@@ -35,35 +35,44 @@
 
 ## 4. Final Release Steps (NOT EXECUTED)
 
-To promote this launch candidate to the final `1.0.0` release:
+To promote this launch candidate to the stable `1.0.0` release, run the following commands in order:
 
-1. **Perform final version bump**
-   ```bash
-   npm version 1.0.0 --no-git-tag-version
-   ```
+```bash
+# 1. Bump version in package.json without creating a git tag automatically
+npm version 1.0.0 --no-git-tag-version
 
-2. **Verify again**
-   ```bash
-   npm run verify
-   ```
+# 2. Run final local verification (typecheck, tests, build)
+npm run verify
 
-3. **Commit the final version bump**
-   ```bash
-   git add package.json package-lock.json CHANGELOG.md
-   git commit -m "chore: bump version to v1.0.0"
-   ```
+# 3. Check for any moderate or higher vulnerabilities
+npm audit --audit-level=moderate
 
-4. **Tag and push**
-   ```bash
-   git tag v1.0.0
-   git push origin main
-   git push origin v1.0.0
-   ```
+# 4. Perform dry-run package verification
+npm pack --dry-run
 
-5. **Publish to npm**
-   ```bash
-   npm publish --access public
-   ```
+# 5. Check git status to ensure working directory is clean except for the version bump
+git status
+
+# 6. Stage only public source, config, and docs files
+git add package.json package-lock.json src tests docs README.md CHANGELOG.md ROADMAP.md SECURITY.md SUPPORT.md
+
+# 7. Commit the stable release version bump
+git commit -m "chore: release v1.0.0"
+
+# 8. Create annotated git tag pointing to the release commit
+git tag -a v1.0.0 -m "v1.0.0: stable OpenGrowth release"
+
+# 9. Push the release commit and tag to remote repository
+git push origin main
+git push origin v1.0.0
+
+# 10. Publish the package to public npm registry
+npm publish --access public
+```
+
+> [!IMPORTANT]
+> **Warning on Release Tagging:**
+> Do not tag v1.0.0 while package.json is still 1.0.0-rc.1. The stable tag must point to the commit where package.json says 1.0.0.
 
 ## 5. Rollback Plan
 
