@@ -22,19 +22,22 @@ export interface AuditResult {
   score: {
     overall: number;
     categories: {
-      offerClarity: number;
-      conversionReadiness: number;
-      seoFoundation: number;
-      contentOpportunity: number;
-      adReadiness: number;
+      seo: number;
+      content: number;
+      conversion: number;
+      trust: number;
+      technical: number;
+      offer: number;
+      ads: number;
     };
   };
   /** High-level findings derived from failed rule results. */
   findings: Array<{
     category: string;
-    priority: "high" | "medium" | "low";
+    severity: string;
     title: string;
     description: string;
+    recommendation: string;
   }>;
   /** Full rule-level results (one per rule). */
   ruleResults: RuleResult[];
@@ -61,26 +64,27 @@ export function runHeuristicAudit(
   const ruleResults = runRules(pageData, rules);
   const scoreCard = calculateScore(ruleResults, rules);
 
-  // Derive findings from failed rules (sorted: high → medium → low)
-  const priorityOrder = { high: 0, medium: 1, low: 2 } as const;
+  // Derive findings from failed rules (sorted: critical → high → medium → low → info)
+  const severityOrder = { critical: 0, high: 1, medium: 2, low: 3, info: 4 } as const;
   const findings = ruleResults
     .filter((r) => !r.passed)
-    .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+    .sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity])
     .map((r) => ({
       category: r.category,
-      priority: r.priority,
+      severity: r.severity,
       title: r.title,
       description: r.description,
+      recommendation: r.recommendation,
     }));
 
-  // Generate prioritised next steps from high-severity failures
+  // Generate prioritised next steps from critical and high-severity failures
   const nextSteps: string[] = [];
-  for (const result of ruleResults.filter((r) => !r.passed && r.priority === "high")) {
+  for (const result of ruleResults.filter((r) => !r.passed && (r.severity === "critical" || r.severity === "high"))) {
     nextSteps.push(`Fix: ${result.title}`);
   }
-  // Add medium-priority next steps if no high-priority failures
+  // Add medium-priority next steps if no high/critical failures
   if (nextSteps.length === 0) {
-    for (const result of ruleResults.filter((r) => !r.passed && r.priority === "medium").slice(0, 3)) {
+    for (const result of ruleResults.filter((r) => !r.passed && r.severity === "medium").slice(0, 3)) {
       nextSteps.push(`Improve: ${result.title}`);
     }
   }
@@ -97,11 +101,13 @@ export function runHeuristicAudit(
     score: {
       overall: scoreCard.overall,
       categories: {
-        offerClarity: scoreCard.categories.offer,
-        conversionReadiness: scoreCard.categories.conversion,
-        seoFoundation: scoreCard.categories.seo,
-        contentOpportunity: scoreCard.categories.content,
-        adReadiness: scoreCard.categories.ads,
+        seo: scoreCard.categories.seo,
+        content: scoreCard.categories.content,
+        conversion: scoreCard.categories.conversion,
+        trust: scoreCard.categories.trust,
+        technical: scoreCard.categories.technical,
+        offer: scoreCard.categories.offer,
+        ads: scoreCard.categories.ads,
       },
     },
     findings,
@@ -139,11 +145,13 @@ export function generateMarkdownReport(audit: AuditResult): string {
   lines.push("");
   lines.push("| Category | Score |");
   lines.push("|----------|-------|");
-  lines.push(`| Offer Clarity | ${audit.score.categories.offerClarity}/100 |`);
-  lines.push(`| Conversion Readiness | ${audit.score.categories.conversionReadiness}/100 |`);
-  lines.push(`| SEO Foundation | ${audit.score.categories.seoFoundation}/100 |`);
-  lines.push(`| Content Opportunity | ${audit.score.categories.contentOpportunity}/100 |`);
-  lines.push(`| Ad Readiness | ${audit.score.categories.adReadiness}/100 |`);
+  lines.push(`| SEO Foundation | ${audit.score.categories.seo}/100 |`);
+  lines.push(`| Content Opportunity | ${audit.score.categories.content}/100 |`);
+  lines.push(`| Conversion Readiness | ${audit.score.categories.conversion}/100 |`);
+  lines.push(`| Trust Signals | ${audit.score.categories.trust}/100 |`);
+  lines.push(`| Technical SEO | ${audit.score.categories.technical}/100 |`);
+  lines.push(`| Offer Clarity | ${audit.score.categories.offer}/100 |`);
+  lines.push(`| Ad Readiness | ${audit.score.categories.ads}/100 |`);
   lines.push("");
 
   if (audit.pageData) {
@@ -169,24 +177,31 @@ export function generateMarkdownReport(audit: AuditResult): string {
     lines.push("");
   } else {
     for (const finding of audit.findings) {
-      const priorityIcon =
-        finding.priority === "high" ? "🔴" : finding.priority === "medium" ? "🟡" : "🟢";
-      lines.push(`### ${priorityIcon} [${finding.priority.toUpperCase()}] ${finding.title}`);
+      let severityIcon = "🟢";
+      if (finding.severity === "critical") severityIcon = "🔴";
+      else if (finding.severity === "high") severityIcon = "🟠";
+      else if (finding.severity === "medium") severityIcon = "🟡";
+      else if (finding.severity === "info") severityIcon = "ℹ️";
+      lines.push(`### ${severityIcon} [${finding.severity.toUpperCase()}] ${finding.title}`);
       lines.push("");
       lines.push(`**Category:** ${finding.category}`);
       lines.push("");
       lines.push(finding.description);
       lines.push("");
+      if (finding.recommendation) {
+        lines.push(`**Recommendation:** ${finding.recommendation}`);
+        lines.push("");
+      }
     }
   }
 
   lines.push("## Rule Results");
   lines.push("");
-  lines.push("| Rule | Category | Status | Priority |");
-  lines.push("|------|----------|--------|----------|");
+  lines.push("| Rule | Category | Status | Severity | Score |");
+  lines.push("|------|----------|--------|----------|-------|");
   for (const r of audit.ruleResults) {
     const status = r.passed ? "✅ Pass" : "❌ Fail";
-    lines.push(`| ${r.title} | ${r.category} | ${status} | ${r.priority} |`);
+    lines.push(`| ${r.title} | ${r.category} | ${status} | ${r.severity} | ${r.score} |`);
   }
   lines.push("");
 
@@ -245,20 +260,25 @@ export function printAuditSummary(audit: AuditResult): void {
   console.log(`  Overall:               ${audit.score.overall}/100`);
   console.log("");
   console.log("  ── Category Breakdown ────────────────────────────────");
-  console.log(`  Offer Clarity:         ${audit.score.categories.offerClarity}/100`);
-  console.log(`  Conversion Readiness:  ${audit.score.categories.conversionReadiness}/100`);
-  console.log(`  SEO Foundation:        ${audit.score.categories.seoFoundation}/100`);
-  console.log(`  Content Opportunity:   ${audit.score.categories.contentOpportunity}/100`);
-  console.log(`  Ad Readiness:          ${audit.score.categories.adReadiness}/100`);
+  console.log(`  SEO Foundation:        ${audit.score.categories.seo}/100`);
+  console.log(`  Content Opportunity:   ${audit.score.categories.content}/100`);
+  console.log(`  Conversion Readiness:  ${audit.score.categories.conversion}/100`);
+  console.log(`  Trust Signals:         ${audit.score.categories.trust}/100`);
+  console.log(`  Technical SEO:         ${audit.score.categories.technical}/100`);
+  console.log(`  Offer Clarity:         ${audit.score.categories.offer}/100`);
+  console.log(`  Ad Readiness:          ${audit.score.categories.ads}/100`);
   console.log("");
   console.log(`  ── Findings (${audit.findings.length}) ───────────────────────────────────`);
   if (audit.findings.length === 0) {
     console.log("  🎉 No issues detected!");
   } else {
     for (const finding of audit.findings.slice(0, 8)) {
-      const icon =
-        finding.priority === "high" ? "🔴" : finding.priority === "medium" ? "🟡" : "🟢";
-      console.log(`  ${icon} [${finding.priority.toUpperCase()}] ${finding.title}`);
+      let icon = "🟢";
+      if (finding.severity === "critical") icon = "🔴";
+      else if (finding.severity === "high") icon = "🟠";
+      else if (finding.severity === "medium") icon = "🟡";
+      else if (finding.severity === "info") icon = "ℹ️";
+      console.log(`  ${icon} [${finding.severity.toUpperCase()}] ${finding.title}`);
     }
     if (audit.findings.length > 8) {
       console.log(`  ... and ${audit.findings.length - 8} more findings`);

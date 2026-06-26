@@ -1,8 +1,10 @@
 /**
- * Ad Readiness rule pack.
+ * Ad Readiness rule pack — 3 rules.
  *
- * Evaluates whether the page has the metadata and structured data needed
- * for effective social sharing, paid ads, and rich search results.
+ * Evaluates lightweight readiness signals that determine how well the page
+ * can support paid traffic campaigns (social ads, display, retargeting).
+ *
+ * Note: Full ad angle generation is planned for v0.5.
  */
 
 import { Rule, RuleResult } from "../types.js";
@@ -13,73 +15,86 @@ export const adsRules: Rule[] = [
     id: "ads-open-graph-exists",
     title: "Open Graph (og:) metadata is present",
     category: "ads",
-    priority: "medium",
+    severity: "medium",
     weight: 50,
     evaluate(page: PageData): RuleResult {
-      const ogKeys = Object.keys(page.openGraph);
-      const passed = ogKeys.length > 0;
+      const og = page.openGraph ?? {};
+      const hasAny = Object.keys(og).length > 0;
       return {
         ruleId: this.id,
-        passed,
-        title: this.title,
         category: this.category,
-        priority: this.priority,
-        description: passed
-          ? `${ogKeys.length} Open Graph tag(s) found.`
-          : "No og: meta tags found. Social shares and link previews will not render rich cards.",
-        evidence: `${ogKeys.length} og: tag(s)`,
+        severity: this.severity,
+        passed: hasAny,
+        score: hasAny ? 100 : 0,
+        title: this.title,
+        description: hasAny
+          ? "Open Graph tags detected — page is ready for social sharing."
+          : "No Open Graph tags found. Social platforms will render generic, unoptimised previews.",
+        evidence: [{ label: "OG fields found", value: Object.keys(og).join(", ") || "(none)" }],
+        recommendation: hasAny
+          ? "No action needed."
+          : "Add og:title, og:description, og:image, and og:url to the <head>.",
       };
     },
   },
 
   {
     id: "ads-open-graph-complete",
-    title: "Open Graph has core fields: title, description, and image",
+    title: "Core Open Graph fields (title, description, image) are all set",
     category: "ads",
-    priority: "low",
+    severity: "low",
     weight: 30,
     evaluate(page: PageData): RuleResult {
-      const ogKeys = Object.keys(page.openGraph);
-      const coreKeys = ["title", "description", "image"];
-      const missing = coreKeys.filter((k) => !ogKeys.includes(k));
+      const og = page.openGraph ?? {};
+      const missing = (["title", "description", "image"] as const).filter(
+        (k) => !og[k],
+      );
       const passed = missing.length === 0;
       return {
         ruleId: this.id,
-        passed,
-        title: this.title,
         category: this.category,
-        priority: this.priority,
+        severity: this.severity,
+        passed,
+        score: passed ? 100 : Math.round(((3 - missing.length) / 3) * 100),
+        title: this.title,
         description: passed
-          ? "Open Graph has title, description, and image — complete for social sharing."
-          : ogKeys.length === 0
-            ? "No Open Graph tags are present to evaluate completeness."
-            : `Missing core Open Graph properties: ${missing.map((k) => `og:${k}`).join(", ")}.`,
-        evidence:
-          missing.length > 0
-            ? `Missing: ${missing.map((k) => `og:${k}`).join(", ")}`
-            : "All core og: fields present",
+          ? "All core OG fields are present (title, description, image)."
+          : `Missing OG fields: ${missing.join(", ")}. Incomplete OG degrades social previews.`,
+        evidence: [
+          { label: "og:title", value: og.title ?? "(missing)" },
+          { label: "og:description", value: og.description ?? "(missing)" },
+          { label: "og:image", value: og.image ?? "(missing)" },
+        ],
+        recommendation: passed
+          ? "No action needed."
+          : `Add the missing Open Graph fields: ${missing.map((f) => `og:${f}`).join(", ")}.`,
       };
     },
   },
 
   {
     id: "ads-json-ld",
-    title: "Structured data (JSON-LD) is present",
+    title: "JSON-LD structured data is present",
     category: "ads",
-    priority: "low",
+    severity: "low",
     weight: 20,
     evaluate(page: PageData): RuleResult {
-      const passed = page.jsonLd.length > 0;
+      const count = (page.jsonLd ?? []).length;
+      const passed = count > 0;
       return {
         ruleId: this.id,
-        passed,
-        title: this.title,
         category: this.category,
-        priority: this.priority,
+        severity: this.severity,
+        passed,
+        score: passed ? 100 : 0,
+        title: this.title,
         description: passed
-          ? `${page.jsonLd.length} JSON-LD block(s) found — enables rich search results.`
-          : "No JSON-LD structured data found. Adding schema.org markup can unlock rich snippets in search.",
-        evidence: `${page.jsonLd.length} JSON-LD block(s)`,
+          ? `${count} JSON-LD block(s) found. Structured data enables rich results in SERPs.`
+          : "No JSON-LD structured data found. Missing structured data reduces eligibility for rich SERP features.",
+        evidence: [{ label: "JSON-LD blocks", value: count }],
+        recommendation: passed
+          ? "No action needed."
+          : "Add a JSON-LD block with Organization, Product, or Article schema to enable rich results.",
       };
     },
   },

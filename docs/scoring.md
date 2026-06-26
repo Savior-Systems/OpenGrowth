@@ -1,8 +1,6 @@
 # OpenGrowth Scoring Model
 
-OpenGrowth scores any audited page across five growth categories and
-produces a single weighted overall score. All scoring is deterministic,
-weight-based, and fully transparent.
+OpenGrowth scores any audited page across seven growth categories and produces a single weighted overall score. All scoring is deterministic, weight-based, and fully transparent.
 
 ## Algorithm
 
@@ -14,9 +12,7 @@ CategoryScore = Σ(weight of each *passed* rule in category)
               × 100
 ```
 
-Each rule carries a `weight` (positive integer) that represents its relative
-importance within its category. Rules with higher weights contribute more to
-the category score.
+Each rule carries a `weight` (positive integer) representing its relative importance within its category. If a category contains no rules in a particular audit run, its score defaults to **100** so that it does not penalise the user.
 
 ### Overall Score (0–100)
 
@@ -24,86 +20,105 @@ the category score.
 OverallScore = Σ(CategoryScore × CategoryWeight)
 ```
 
-This is a weighted average of all five category scores.
+This is a weighted average of all seven category scores.
+
+---
 
 ## Category Weights
 
 | Category | Weight | Rationale |
 |----------|--------|-----------|
-| SEO Foundation | 0.25 (25%) | Crawlability and indexing are prerequisites for any growth |
-| Offer Clarity | 0.25 (25%) | Clear value proposition drives every downstream metric |
-| Conversion Readiness | 0.25 (25%) | Traffic without conversion is wasted |
-| Content Opportunity | 0.15 (15%) | Content underpins SEO, offer, and conversion |
-| Ad Readiness | 0.10 (10%) | Supplementary — enables paid amplification |
+| SEO Foundation | 0.20 (20%) | Crawlability and basic metadata indexing |
+| Offer Clarity | 0.15 (15%) | Clarity of value proposition and layout |
+| Conversion Readiness | 0.20 (20%) | Direct action and funnel/conversion paths |
+| Trust Signals | 0.15 (15%) | Essential policies, social proof, secure connections |
+| Content Opportunity | 0.15 (15%) | Content depth, accessibility, context alignment |
+| Ad Readiness | 0.10 (10%) | Social sharing metadata and rich schemas |
+| Technical SEO | 0.05 (5%) | Advanced technical optimizations (placeholder) |
 
-**Total: 1.00**
+**Total: 1.00 (100%)**
+
+---
 
 ## Rule Weights (within each category)
 
 ### SEO Foundation (total weight: 130)
 
-| Rule | Weight | % of Category |
-|------|--------|----------------|
-| Title tag exists | 30 | 23% |
-| Title length optimal | 20 | 15% |
-| Meta description exists | 30 | 23% |
-| Meta description length optimal | 10 | 8% |
-| Canonical URL set | 20 | 15% |
-| robots.txt reachable | 10 | 8% |
-| sitemap.xml reachable | 10 | 8% |
+| Rule | Severity | Weight | % of Category |
+|------|----------|--------|----------------|
+| Title tag is present | high | 30 | 23% |
+| Title tag length is optimal | medium | 20 | 15% |
+| Meta description is present | high | 30 | 23% |
+| Meta description length is optimal | medium | 10 | 8% |
+| Canonical URL is set | medium | 20 | 15% |
+| robots.txt is reachable | medium | 10 | 8% |
+| sitemap.xml is reachable | low | 10 | 8% |
 
 ### Offer Clarity (total weight: 100)
 
-| Rule | Weight | % of Category |
-|------|--------|----------------|
-| Single H1 heading | 60 | 60% |
-| Heading hierarchy (3+) | 40 | 40% |
+| Rule | Severity | Weight | % of Category |
+|------|----------|--------|----------------|
+| Exactly one H1 heading is present | high | 60 | 60% |
+| Page has a rich heading hierarchy | medium | 40 | 40% |
 
 ### Conversion Readiness (total weight: 100)
 
-| Rule | Weight | % of Category |
-|------|--------|----------------|
-| CTA elements present | 60 | 60% |
-| Lead-capture forms present | 40 | 40% |
+| Rule | Severity | Weight | % of Category |
+|------|----------|--------|----------------|
+| CTA elements are present | high | 30 | 30% |
+| Multiple CTA elements provide varied action paths | low | 15 | 15% |
+| CTA text uses direct action verbs | medium | 20 | 20% |
+| Contact, demo, or trial path is available | medium | 20 | 20% |
+| Forms do not have excessive input fields | low | 15 | 15% |
+
+### Trust Signals (total weight: 100)
+
+| Rule | Severity | Weight | % of Category |
+|------|----------|--------|----------------|
+| Policy links are present | medium | 25 | 25% |
+| Social proof language is present | medium | 30 | 30% |
+| A contact or support mechanism is present | medium | 25 | 25% |
+| Page is served over HTTPS | high | 20 | 20% |
 
 ### Content Opportunity (total weight: 100)
 
-| Rule | Weight | % of Category |
-|------|--------|----------------|
-| Word count ≥ 250 | 60 | 60% |
-| All images have alt text | 40 | 40% |
+| Rule | Severity | Weight | % of Category |
+|------|----------|--------|----------------|
+| Page has sufficient content depth | medium | 25 | 25% |
+| Page uses a structured heading hierarchy | medium | 20 | 20% |
+| Page contains internal links | low | 15 | 15% |
+| Page content reflects business context | info | 20 | 20% |
+| All images have descriptive alt text | medium | 20 | 20% |
 
 ### Ad Readiness (total weight: 100)
 
-| Rule | Weight | % of Category |
-|------|--------|----------------|
-| Open Graph metadata present | 50 | 50% |
-| Open Graph core fields complete | 30 | 30% |
-| JSON-LD structured data present | 20 | 20% |
+| Rule | Severity | Weight | % of Category |
+|------|----------|--------|----------------|
+| Open Graph metadata is present | medium | 50 | 50% |
+| Core OG fields are set | low | 30 | 30% |
+| JSON-LD structured data is present | low | 20 | 20% |
+
+### Technical SEO (total weight: 0)
+- Currently empty. Scores 100% automatically.
+
+---
 
 ## Example Calculation
 
 A page that:
 - Passes all SEO rules → **SEO = 100**
 - Has one H1 but only 2 headings → **Offer = 60**
-- Has a CTA but no form → **Conversion = 60**
-- Has 300 words and all images have alt text → **Content = 100**
+- Passes all Conversion rules → **Conversion = 100**
+- Has no Policy links but passes other Trust rules → **Trust = 75**
+- Passes all Content rules → **Content = 100**
 - Has no Open Graph or JSON-LD → **Ads = 0**
+- Category with no rules → **Technical = 100**
 
 ```
-Overall = (100 × 0.25) + (60 × 0.25) + (60 × 0.25) + (100 × 0.15) + (0 × 0.10)
-        = 25 + 15 + 15 + 15 + 0
-        = 70 / 100
+Overall = (100 × 0.20) + (60 × 0.15) + (100 × 0.20) + (75 × 0.15) + (100 × 0.15) + (0 × 0.10) + (100 × 0.05)
+        = 20 + 9 + 20 + 11.25 + 15 + 0 + 5
+        = 80.25 → 80 / 100
 ```
-
-## Output Files
-
-| File | Contents |
-|------|---------|
-| `scorecard.json` | Complete `AuditResult` including all scores, findings, and rule results |
-| `rule-results.json` | Raw array of `RuleResult` objects for every rule |
-| `report.md` | Human-readable Markdown report |
-| `page-data.json` | Normalised `PageData` produced by the crawler |
 
 ## Score Interpretation
 
@@ -114,17 +129,3 @@ Overall = (100 × 0.25) + (60 × 0.25) + (60 × 0.25) + (100 × 0.15) + (0 × 0.
 | 50–69 | Moderate — critical issues are impacting growth potential |
 | 30–49 | Weak — significant structural work needed |
 | 0–29 | Critical — fundamental growth blockers present |
-
-## Programmatic Usage
-
-```typescript
-import { runRules, calculateScore, getAllRules } from 'opengrowth';
-
-const rules = getAllRules();
-const results = runRules(myPageData, rules);
-const scoreCard = calculateScore(results, rules);
-
-console.log(scoreCard.overall);            // e.g. 72
-console.log(scoreCard.categories.seo);    // e.g. 85
-console.log(scoreCard.categories.offer);  // e.g. 60
-```

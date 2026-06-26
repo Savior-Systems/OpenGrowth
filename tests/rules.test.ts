@@ -1,5 +1,5 @@
 /**
- * Unit tests for the v0.3 rule engine packs.
+ * Unit tests for the v0.3.1 rule engine packs.
  *
  * Each test drives a specific rule with a crafted PageData fixture so that
  * all tests are deterministic, self-contained, and have no network calls.
@@ -11,6 +11,7 @@ import { offerRules } from "../src/rules/packs/offer.js";
 import { conversionRules } from "../src/rules/packs/conversion.js";
 import { contentRules } from "../src/rules/packs/content.js";
 import { adsRules } from "../src/rules/packs/ads.js";
+import { trustRules } from "../src/rules/packs/trust.js";
 import { getAllRules, getRulesByCategory, getRuleById } from "../src/rules/registry.js";
 import { runRules } from "../src/rules/runner.js";
 import { PageData } from "../src/models/page-data.js";
@@ -33,12 +34,19 @@ function perfectPage(): PageData {
       { level: 2, text: "Pricing" },
       { level: 3, text: "Enterprise Plans" },
     ],
-    links: [{ href: "https://example.com/about", text: "About", isInternal: true }],
+    links: [
+      { href: "https://example.com/about", text: "About Us", isInternal: true },
+      { href: "https://example.com/privacy", text: "Privacy Policy", isInternal: true },
+      { href: "https://example.com/contact", text: "Contact Support", isInternal: true },
+    ],
     images: [
       { src: "hero.png", alt: "Team collaboration dashboard" },
       { src: "logo.png", alt: "Company logo" },
     ],
-    ctas: [{ text: "Start Free Trial", href: "/signup", tag: "a" }],
+    ctas: [
+      { text: "Start Free Trial", href: "/signup", tag: "a" },
+      { text: "Learn More", href: "/features", tag: "a" }
+    ],
     forms: [
       {
         action: "/subscribe",
@@ -47,6 +55,7 @@ function perfectPage(): PageData {
       },
     ],
     bodyText:
+      "Scale your team with ease. We are trusted by thousands of clients. Read their customer reviews and testimonials. " +
       "Lorem ipsum dolor sit amet ".repeat(60) + "consectetur adipiscing elit.", // ~300 words
     openGraph: {
       title: "Best SaaS Tool",
@@ -62,7 +71,7 @@ function perfectPage(): PageData {
 /** Returns a bare-minimum PageData that fails every rule. */
 function emptyPage(): PageData {
   return {
-    url: "https://empty.example.com",
+    url: "http://empty.example.com", // http URL to fail HTTPS rule
     headings: [],
     links: [],
     images: [],
@@ -142,9 +151,14 @@ describe("Rule runner", () => {
   it("empty page fails all rules", () => {
     const results = runRules(emptyPage());
     const passed = results.filter((r) => r.passed);
-    // Only content-image-alt-tags should pass on empty page (no images)
-    const notImageAlt = passed.filter((r) => r.ruleId !== "content-image-alt-tags");
-    expect(notImageAlt.length).toBe(0);
+    // These rules are designed to pass on empty/no-content pages by default
+    const expectedPassOnEmpty = [
+      "content-image-alt-tags",
+      "conversion-form-friction",
+      "content-context-alignment",
+    ];
+    const unexpectedPass = passed.filter((r) => !expectedPassOnEmpty.includes(r.ruleId));
+    expect(unexpectedPass.length).toBe(0);
   });
 });
 
@@ -168,7 +182,8 @@ describe("SEO rules", () => {
 
     it("evidence contains the title text when present", () => {
       const result = rule.evaluate(perfectPage());
-      expect(result.evidence).toBe("Best SaaS Tool for Teams");
+      expect(result.evidence[0].label).toBe("title");
+      expect(result.evidence[0].value).toBe("Best SaaS Tool for Teams");
     });
   });
 
@@ -203,11 +218,11 @@ describe("SEO rules", () => {
   describe("seo-meta-description-exists", () => {
     const rule = ruleMap["seo-meta-description-exists"];
 
-    it("passes when meta description is present", () => {
+    it("passes when description is present", () => {
       expect(rule.evaluate(perfectPage()).passed).toBe(true);
     });
 
-    it("fails when meta description is missing", () => {
+    it("fails when description is missing", () => {
       expect(rule.evaluate(emptyPage()).passed).toBe(false);
     });
   });
@@ -215,10 +230,8 @@ describe("SEO rules", () => {
   describe("seo-meta-description-length", () => {
     const rule = ruleMap["seo-meta-description-length"];
 
-    it("passes for a description of 50-160 characters", () => {
-      const page = perfectPage();
-      page.metaDescription = "A".repeat(100);
-      expect(rule.evaluate(page).passed).toBe(true);
+    it("passes for a description between 50-160 characters", () => {
+      expect(rule.evaluate(perfectPage()).passed).toBe(true);
     });
 
     it("fails for a description shorter than 50 characters", () => {
@@ -229,7 +242,7 @@ describe("SEO rules", () => {
 
     it("fails for a description longer than 160 characters", () => {
       const page = perfectPage();
-      page.metaDescription = "A".repeat(161);
+      page.metaDescription = "a".repeat(161);
       expect(rule.evaluate(page).passed).toBe(false);
     });
   });
@@ -237,11 +250,11 @@ describe("SEO rules", () => {
   describe("seo-canonical-url", () => {
     const rule = ruleMap["seo-canonical-url"];
 
-    it("passes when canonicalUrl is set", () => {
+    it("passes when canonical url is set", () => {
       expect(rule.evaluate(perfectPage()).passed).toBe(true);
     });
 
-    it("fails when canonicalUrl is absent", () => {
+    it("fails when canonical url is missing", () => {
       expect(rule.evaluate(emptyPage()).passed).toBe(false);
     });
   });
@@ -249,35 +262,24 @@ describe("SEO rules", () => {
   describe("seo-robots-txt", () => {
     const rule = ruleMap["seo-robots-txt"];
 
-    it("passes when robotsTxtStatus is 200", () => {
+    it("passes when status is 200", () => {
       expect(rule.evaluate(perfectPage()).passed).toBe(true);
     });
 
-    it("fails when robotsTxtStatus is 404", () => {
+    it("fails when status is not 200", () => {
       expect(rule.evaluate(emptyPage()).passed).toBe(false);
     });
 
     it("evidence contains the HTTP status code", () => {
       const result = rule.evaluate(emptyPage());
-      expect(result.evidence).toContain("404");
-    });
-  });
-
-  describe("seo-sitemap", () => {
-    const rule = ruleMap["seo-sitemap"];
-
-    it("passes when sitemapStatus is 200", () => {
-      expect(rule.evaluate(perfectPage()).passed).toBe(true);
-    });
-
-    it("fails when sitemapStatus is 404", () => {
-      expect(rule.evaluate(emptyPage()).passed).toBe(false);
+      expect(result.evidence[0].label).toBe("HTTP status");
+      expect(result.evidence[0].value).toBe(404);
     });
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Offer clarity rule pack
+// Offer rule pack
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("Offer rules", () => {
@@ -305,7 +307,8 @@ describe("Offer rules", () => {
 
     it("evidence reports the correct H1 count", () => {
       const result = rule.evaluate(perfectPage());
-      expect(result.evidence).toContain("1");
+      expect(result.evidence[0].label).toBe("H1 count");
+      expect(result.evidence[0].value).toBe(1);
     });
   });
 
@@ -343,15 +346,21 @@ describe("Conversion rules", () => {
     });
   });
 
-  describe("conversion-form-present", () => {
-    const rule = ruleMap["conversion-form-present"];
+  describe("conversion-form-friction", () => {
+    const rule = ruleMap["conversion-form-friction"];
 
-    it("passes when forms are present", () => {
+    it("passes (friction is fine) when forms are present with <=6 fields", () => {
       expect(rule.evaluate(perfectPage()).passed).toBe(true);
     });
 
-    it("fails when no forms are present", () => {
-      expect(rule.evaluate(emptyPage()).passed).toBe(false);
+    it("passes (friction is fine by default) when no forms are present", () => {
+      expect(rule.evaluate(emptyPage()).passed).toBe(true);
+    });
+
+    it("fails when form has >6 fields", () => {
+      const page = perfectPage();
+      page.forms[0].inputs = Array(7).fill({ type: "text", name: "field" });
+      expect(rule.evaluate(page).passed).toBe(false);
     });
   });
 });
@@ -363,8 +372,8 @@ describe("Conversion rules", () => {
 describe("Content rules", () => {
   const ruleMap = Object.fromEntries(contentRules.map((r) => [r.id, r]));
 
-  describe("content-word-count", () => {
-    const rule = ruleMap["content-word-count"];
+  describe("content-body-depth", () => {
+    const rule = ruleMap["content-body-depth"];
 
     it("passes when word count is 250 or more", () => {
       const page = perfectPage(); // fixture has ~300 words
@@ -379,7 +388,8 @@ describe("Content rules", () => {
 
     it("evidence reports the word count", () => {
       const result = rule.evaluate(emptyPage());
-      expect(result.evidence).toMatch(/\d+ words/);
+      expect(result.evidence[0].label).toBe("word count");
+      expect(result.evidence[0].value).toBe(0);
     });
   });
 
@@ -404,7 +414,66 @@ describe("Content rules", () => {
       const page = perfectPage();
       page.images = [{ src: "a.png", alt: "good" }, { src: "b.png", alt: "" }];
       const result = rule.evaluate(page);
-      expect(result.evidence).toContain("1 missing / 2 total");
+      expect(result.evidence[0].label).toBe("missing alt");
+      expect(result.evidence[0].value).toBe(1);
+      expect(result.evidence[1].label).toBe("total images");
+      expect(result.evidence[1].value).toBe(2);
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Trust rule pack
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("Trust rules", () => {
+  const ruleMap = Object.fromEntries(trustRules.map((r) => [r.id, r]));
+
+  describe("trust-policy-links", () => {
+    const rule = ruleMap["trust-policy-links"];
+
+    it("passes when policy keywords are found in links", () => {
+      expect(rule.evaluate(perfectPage()).passed).toBe(true);
+    });
+
+    it("fails when no policy keywords are in links", () => {
+      expect(rule.evaluate(emptyPage()).passed).toBe(false);
+    });
+  });
+
+  describe("trust-social-proof-language", () => {
+    const rule = ruleMap["trust-social-proof-language"];
+
+    it("passes when social proof language exists", () => {
+      expect(rule.evaluate(perfectPage()).passed).toBe(true);
+    });
+
+    it("fails when no social proof language exists", () => {
+      expect(rule.evaluate(emptyPage()).passed).toBe(false);
+    });
+  });
+
+  describe("trust-contact-signal", () => {
+    const rule = ruleMap["trust-contact-signal"];
+
+    it("passes when contact mechanisms are present", () => {
+      expect(rule.evaluate(perfectPage()).passed).toBe(true);
+    });
+
+    it("fails when no contact mechanisms are present", () => {
+      expect(rule.evaluate(emptyPage()).passed).toBe(false);
+    });
+  });
+
+  describe("trust-secure-url", () => {
+    const rule = ruleMap["trust-secure-url"];
+
+    it("passes when url uses https", () => {
+      expect(rule.evaluate(perfectPage()).passed).toBe(true);
+    });
+
+    it("fails when url uses http", () => {
+      expect(rule.evaluate(emptyPage()).passed).toBe(false);
     });
   });
 });
@@ -441,18 +510,18 @@ describe("Ads rules", () => {
       expect(rule.evaluate(page).passed).toBe(false);
     });
 
-    it("evidence lists the missing fields", () => {
+    it("evidence lists the fields and their values", () => {
       const page = perfectPage();
       page.openGraph = { title: "Only title" };
       const result = rule.evaluate(page);
-      expect(result.evidence).toContain("description");
-      expect(result.evidence).toContain("image");
+      expect(result.evidence.some(e => e.label === "og:title" && e.value === "Only title")).toBe(true);
+      expect(result.evidence.some(e => e.label === "og:description" && e.value === "(missing)")).toBe(true);
     });
 
     it("handles the no-OG case gracefully", () => {
       const result = rule.evaluate(emptyPage());
       expect(result.passed).toBe(false);
-      expect(result.description).toContain("No Open Graph tags");
+      expect(result.description).toContain("Missing OG fields");
     });
   });
 

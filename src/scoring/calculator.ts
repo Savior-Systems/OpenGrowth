@@ -37,14 +37,24 @@ export interface ScoreCard {
  *  - ads readiness is important but supplementary
  */
 export const CATEGORY_WEIGHTS: Record<RuleCategory, number> = {
-  seo: 0.25,
-  offer: 0.25,
-  conversion: 0.25,
+  seo: 0.20,
+  offer: 0.15,
+  conversion: 0.20,
+  trust: 0.15,
   content: 0.15,
   ads: 0.10,
+  technical: 0.05,
 };
 
-const CATEGORIES: RuleCategory[] = ["seo", "offer", "conversion", "content", "ads"];
+const CATEGORIES: RuleCategory[] = [
+  "seo",
+  "content",
+  "conversion",
+  "trust",
+  "technical",
+  "offer",
+  "ads",
+];
 
 /**
  * Compute a ScoreCard from rule results and the rules that produced them.
@@ -61,7 +71,8 @@ export function calculateScore(results: RuleResult[], rules: Rule[]): ScoreCard 
     const totalWeight = catRules.reduce((sum, r) => sum + r.weight, 0);
 
     if (totalWeight === 0) {
-      categories[cat] = 0;
+      // If a category has no rules, default it to 100 so it doesn't penalise the score
+      categories[cat] = 100;
       continue;
     }
 

@@ -121,7 +121,7 @@ describe("runHeuristicAudit", () => {
       expect(r).toHaveProperty("ruleId");
       expect(r).toHaveProperty("passed");
       expect(r).toHaveProperty("category");
-      expect(r).toHaveProperty("priority");
+      expect(r).toHaveProperty("severity");
     }
   });
 
@@ -144,11 +144,13 @@ describe("runHeuristicAudit", () => {
 
   it("has all category scores", () => {
     const audit = runHeuristicAudit("https://test.com", "", dummyPageData);
-    expect(audit.score.categories.offerClarity).toBeTypeOf("number");
-    expect(audit.score.categories.conversionReadiness).toBeTypeOf("number");
-    expect(audit.score.categories.seoFoundation).toBeTypeOf("number");
-    expect(audit.score.categories.contentOpportunity).toBeTypeOf("number");
-    expect(audit.score.categories.adReadiness).toBeTypeOf("number");
+    expect(audit.score.categories.seo).toBeTypeOf("number");
+    expect(audit.score.categories.content).toBeTypeOf("number");
+    expect(audit.score.categories.conversion).toBeTypeOf("number");
+    expect(audit.score.categories.trust).toBeTypeOf("number");
+    expect(audit.score.categories.technical).toBeTypeOf("number");
+    expect(audit.score.categories.offer).toBeTypeOf("number");
+    expect(audit.score.categories.ads).toBeTypeOf("number");
   });
 
   it("has findings array containing heuristic problems", () => {

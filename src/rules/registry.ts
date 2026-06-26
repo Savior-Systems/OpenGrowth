@@ -14,6 +14,7 @@ import { offerRules } from "./packs/offer.js";
 import { conversionRules } from "./packs/conversion.js";
 import { contentRules } from "./packs/content.js";
 import { adsRules } from "./packs/ads.js";
+import { trustRules } from "./packs/trust.js";
 
 /** All registered rules in evaluation order. */
 const ALL_RULES: Rule[] = [
@@ -22,6 +23,7 @@ const ALL_RULES: Rule[] = [
   ...conversionRules,
   ...contentRules,
   ...adsRules,
+  ...trustRules,
 ];
 
 /**
