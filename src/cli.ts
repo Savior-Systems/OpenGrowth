@@ -31,8 +31,8 @@ program
     "Output format (json, markdown)",
     "json",
   )
-  .action((url: string, opts: { context: string; output: string; format: string }) => {
-    runAudit({
+  .action(async (url: string, opts: { context: string; output: string; format: string }) => {
+    await runAudit({
       url,
       context: opts.context,
       output: opts.output,

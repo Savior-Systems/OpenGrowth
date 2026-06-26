@@ -41,6 +41,7 @@
     "verify": "npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
+    "cheerio": "^1.2.0",
     "commander": "^13.1.0"
   },
   "devDependencies": {

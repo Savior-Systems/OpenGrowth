@@ -6,8 +6,15 @@
 
 export { isValidUrl, normalizeUrl } from "./utils/url.js";
 export {
-  generatePlaceholderAudit,
+  runHeuristicAudit,
   generateMarkdownReport,
   runAudit,
 } from "./commands/audit.js";
 export type { AuditResult } from "./commands/audit.js";
+
+// Crawler & Parser exports
+export { fetchPage, getUrlStatus } from "./crawler/fetcher.js";
+export { parseHtml } from "./crawler/parser.js";
+
+// Model types
+export * from "./models/page-data.js";
