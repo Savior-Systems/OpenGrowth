@@ -33,7 +33,7 @@ All **free**, **local-first**, and **no paid API required**.
 
 ## Features
 
-> 🏗️ **Under active development** — v0.4 Content Strategy Generator is live.
+> 🏗️ **Under active development** — v0.5 Ad Angle Generator is live.
 
 - **CLI** — Run audits from your terminal
 - **GitHub Action** — Automate growth audits in CI/CD
@@ -56,8 +56,8 @@ npm run build
 node dist/cli.js audit https://example.com --context "Demo SaaS"
 ```
 
-> **Current version:** v0.4 — content strategy generator, real crawler, rule engine, and weighted scoring.
-> Six output files per audit: `scorecard.json`, `report.md`, `rule-results.json`, `page-data.json`, `content-strategy.json`, and `content-strategy.md`.
+> **Current version:** v0.5 — ad angle generator, content strategy generator, real crawler, rule engine, and weighted scoring.
+> Eight output files per audit: `scorecard.json`, `report.md`, `rule-results.json`, `page-data.json`, `content-strategy.json`, `content-strategy.md`, `ad-strategy.json`, and `ad-strategy.md`.
 
 ## How It Works
 
@@ -82,7 +82,7 @@ node dist/cli.js audit https://example.com --context "Demo SaaS"
 | Web Crawler/Parser | ✅ v0.2 |
 | Rule Engine & Scoring | ✅ v0.3.1 |
 | Content Strategy | ✅ v0.4 |
-| Ad Angle Generator | 🔜 Planned |
+| Ad Angle Generator | ✅ v0.5 |
 | HTML Reports | 🔜 Planned |
 | GitHub Action | 🔜 Planned |
 | Dashboard | 🔜 Planned |

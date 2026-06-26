@@ -43,11 +43,11 @@ OpenGrowth becomes the **Lighthouse for growth** — the standard open-source to
 
 ## v0.5 — Ad Angle Generator
 
-- [ ] Value proposition extraction
-- [ ] Ad angle templates (pain/gain/feature/social-proof)
-- [ ] Headline and hook generation (rule-based)
-- [ ] Ad copy variations
-- [ ] Audience angle suggestions
+- [x] Value proposition extraction
+- [x] Ad angle templates (pain/gain/feature/social-proof)
+- [x] Headline and hook generation (rule-based)
+- [x] Ad copy variations
+- [x] Audience angle suggestions
 
 ## v0.6 — HTML Reports
 

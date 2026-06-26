@@ -10,6 +10,8 @@ import { RuleResult } from "../rules/types.js";
 import { calculateScore } from "../scoring/calculator.js";
 import { generateContentStrategy } from "../strategy/content-strategy.js";
 import { generateContentStrategyMarkdown } from "../strategy/markdown.js";
+import { generateAdStrategy } from "../ads/ad-angle-generator.js";
+import { generateAdStrategyMarkdown } from "../ads/markdown.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -70,6 +72,33 @@ export interface AuditResult {
       goal: string;
     }>;
   };
+  adStrategy?: {
+    summary: string;
+    audienceSegments: Array<{
+      name: string;
+      stage: string;
+      painPoint: string;
+      desiredOutcome: string;
+      messageFocus: string;
+      suggestedPlatforms: string[];
+    }>;
+    hooks: Array<{
+      text: string;
+      family: string;
+      platformFit: string[];
+      reason: string;
+    }>;
+    adCopyVariants: Array<{
+      platform: string;
+      family: string;
+      stage: string;
+      primaryText: string;
+      headline: string;
+      description?: string;
+      cta: string;
+      creativeNote: string;
+    }>;
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -126,9 +155,17 @@ export function runHeuristicAudit(
     scorecard: scoreCard,
   });
 
+  const adStrategyData = generateAdStrategy({
+    page: pageData,
+    context,
+    scorecard: scoreCard,
+    ruleResults,
+    contentStrategy: contentStrategyData,
+  });
+
   return {
     tool: "OpenGrowth",
-    version: "0.4.0",
+    version: "0.5.0",
     url,
     context: context || "No business context provided.",
     generatedAt: new Date().toISOString(),
@@ -159,6 +196,24 @@ export function runHeuristicAudit(
       })),
       contentGaps: contentStrategyData.contentGaps,
       calendar30Days: contentStrategyData.calendar30Days,
+    },
+    adStrategy: {
+      summary: adStrategyData.summary,
+      audienceSegments: adStrategyData.audienceSegments.map((s) => ({
+        name: s.name,
+        stage: s.stage,
+        painPoint: s.painPoint,
+        desiredOutcome: s.desiredOutcome,
+        messageFocus: s.messageFocus,
+        suggestedPlatforms: s.suggestedPlatforms,
+      })),
+      hooks: adStrategyData.hooks.map((h) => ({
+        text: h.text,
+        family: h.family,
+        platformFit: h.platformFit,
+        reason: h.reason,
+      })),
+      adCopyVariants: adStrategyData.adCopyVariants,
     },
   };
 }
@@ -390,6 +445,14 @@ export async function runAudit(options: {
       scorecard: { overall: audit.score.overall, categories: audit.score.categories },
     });
 
+    const fullAdStrategy = generateAdStrategy({
+      page: pageData,
+      context: options.context,
+      scorecard: { overall: audit.score.overall, categories: audit.score.categories },
+      ruleResults: audit.ruleResults,
+      contentStrategy: fullStrategy,
+    });
+
     // 5. Print summary to terminal
     printAuditSummary(audit);
 
@@ -417,6 +480,12 @@ export async function runAudit(options: {
     const strategyMdPath = resolve(outputDir, "content-strategy.md");
     writeFileSync(strategyMdPath, generateContentStrategyMarkdown(fullStrategy), "utf-8");
 
+    const adStrategyJsonPath = resolve(outputDir, "ad-strategy.json");
+    writeFileSync(adStrategyJsonPath, JSON.stringify(fullAdStrategy, null, 2), "utf-8");
+
+    const adStrategyMdPath = resolve(outputDir, "ad-strategy.md");
+    writeFileSync(adStrategyMdPath, generateAdStrategyMarkdown(fullAdStrategy), "utf-8");
+
     const passedCount = audit.ruleResults.filter((r) => r.passed).length;
     const totalRules = audit.ruleResults.length;
     const highFindingsCount = audit.findings.filter(
@@ -432,6 +501,7 @@ export async function runAudit(options: {
     console.log(`  Rules Passed:            ${passedCount}/${totalRules}`);
     console.log(`  High Priority Findings:  ${highFindingsCount}`);
     console.log(`  Content Strategy:        Generated`);
+    console.log(`  Ad Strategy:             Generated`);
     console.log(`  Output Directory:        ${options.output}`);
     console.log("");
     console.log("  ── Output Files ─────────────────────────────────────");
@@ -441,6 +511,8 @@ export async function runAudit(options: {
     console.log(`  📄 ${pageDataPath}`);
     console.log(`  📄 ${strategyJsonPath}`);
     console.log(`  📄 ${strategyMdPath}`);
+    console.log(`  📄 ${adStrategyJsonPath}`);
+    console.log(`  📄 ${adStrategyMdPath}`);
     console.log("");
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);

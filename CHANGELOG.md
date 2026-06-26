@@ -5,7 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.0] - Unreleased
+## [0.5.0] - Unreleased
+
+### Added
+- Deterministic ad angle generator.
+- Audience segment generation.
+- Value proposition extraction.
+- Hook generation across ad angle families.
+- Platform-specific ad copy variants.
+- Short video/reel concepts.
+- Carousel concepts.
+- Creative direction notes.
+- Ad strategy JSON and Markdown exports.
+
+## [0.4.0] - 2026-06-27
 
 ### Added
 - Deterministic content strategy generator.

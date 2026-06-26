@@ -109,7 +109,7 @@ describe("runHeuristicAudit", () => {
 
   it("returns correct version", () => {
     const audit = runHeuristicAudit("https://example.com", "", dummyPageData);
-    expect(audit.version).toBe("0.4.0");
+    expect(audit.version).toBe("0.5.0");
   });
 
   it("includes ruleResults array from rule engine", () => {
@@ -256,7 +256,7 @@ describe("runAudit file output", () => {
     const rawScorecard = readFileSync(resolve(testOutputDir, "scorecard.json"), "utf-8");
     const data = JSON.parse(rawScorecard) as any;
     expect(data.tool).toBe("OpenGrowth");
-    expect(data.version).toBe("0.4.0");
+    expect(data.version).toBe("0.5.0");
     expect(data.url).toBe("https://example.com");
     expect(data.pageData).toBeDefined();
     expect(data.pageData?.title).toBe("Mock Page");
@@ -284,5 +284,33 @@ describe("runAudit file output", () => {
     expect(data.contentStrategy).toHaveProperty("topicClusters");
     expect(data.contentStrategy).toHaveProperty("calendar30Days");
     expect(data.contentStrategy.calendar30Days.length).toBe(30);
+
+    // v0.5: verify ad strategy files and structure
+    expect(existsSync(resolve(testOutputDir, "ad-strategy.json"))).toBe(true);
+    expect(existsSync(resolve(testOutputDir, "ad-strategy.md"))).toBe(true);
+
+    const rawAdStrategy = readFileSync(resolve(testOutputDir, "ad-strategy.json"), "utf-8");
+    const adStrategy = JSON.parse(rawAdStrategy);
+    expect(adStrategy).toHaveProperty("audienceSegments");
+    expect(adStrategy.audienceSegments.length).toBeGreaterThanOrEqual(5);
+    expect(adStrategy).toHaveProperty("hooks");
+    expect(adStrategy.hooks.length).toBeGreaterThanOrEqual(20);
+    expect(adStrategy).toHaveProperty("adCopyVariants");
+    expect(adStrategy.adCopyVariants.length).toBeGreaterThanOrEqual(24);
+    expect(adStrategy).toHaveProperty("shortVideoConcepts");
+    expect(adStrategy.shortVideoConcepts.length).toBeGreaterThanOrEqual(8);
+    expect(adStrategy).toHaveProperty("carouselConcepts");
+    expect(adStrategy.carouselConcepts.length).toBeGreaterThanOrEqual(5);
+
+    const mdAdStrategy = readFileSync(resolve(testOutputDir, "ad-strategy.md"), "utf-8");
+    expect(mdAdStrategy).toContain("Ad Copy Variants");
+
+    // Check scorecard includes compact adStrategy summary
+    expect(data).toHaveProperty("adStrategy");
+    expect(data.adStrategy).toHaveProperty("summary");
+    expect(data.adStrategy).toHaveProperty("audienceSegments");
+    expect(data.adStrategy).toHaveProperty("hooks");
+    expect(data.adStrategy).toHaveProperty("adCopyVariants");
+    expect(data.adStrategy.adCopyVariants.length).toBeGreaterThanOrEqual(24);
   });
 });

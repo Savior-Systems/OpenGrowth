@@ -34,3 +34,10 @@ export { extractKeywords } from "./strategy/keyword-extractor.js";
 export { generateContentStrategy } from "./strategy/content-strategy.js";
 export { generateContentCalendar } from "./strategy/calendar.js";
 export { generateContentStrategyMarkdown } from "./strategy/markdown.js";
+
+// Ad Strategy exports
+export * from "./ads/types.js";
+export { extractAdInputs } from "./ads/angle-extractor.js";
+export { generateAdStrategy } from "./ads/ad-angle-generator.js";
+export { generateAdCopyVariants } from "./ads/copy-generator.js";
+export { generateAdStrategyMarkdown } from "./ads/markdown.js";

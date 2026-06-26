@@ -186,6 +186,8 @@ describe("Content Strategy Generator", () => {
         scorecard: mockScorecard,
       });
 
+      s1.generatedAt = "mock-date";
+      s2.generatedAt = "mock-date";
       expect(s1).toEqual(s2);
     });
   });
