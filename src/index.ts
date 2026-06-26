@@ -41,3 +41,8 @@ export { extractAdInputs } from "./ads/angle-extractor.js";
 export { generateAdStrategy } from "./ads/ad-angle-generator.js";
 export { generateAdCopyVariants } from "./ads/copy-generator.js";
 export { generateAdStrategyMarkdown } from "./ads/markdown.js";
+
+// HTML Report exports
+export { generateHtmlReport } from "./report/html.js";
+export type { HtmlReportInput } from "./report/html.js";
+export { escapeHtml, clampScore, scoreLabel } from "./report/html-utils.js";

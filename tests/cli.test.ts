@@ -109,7 +109,7 @@ describe("runHeuristicAudit", () => {
 
   it("returns correct version", () => {
     const audit = runHeuristicAudit("https://example.com", "", dummyPageData);
-    expect(audit.version).toBe("0.5.0");
+    expect(audit.version).toBe("0.6.0");
   });
 
   it("includes ruleResults array from rule engine", () => {
@@ -221,7 +221,7 @@ describe("runAudit file output", () => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Mock Page</title>
+        <title>Mock Page &lt;script&gt;alert(1)&lt;/script&gt;</title>
         <meta name="description" content="A simple test mock page.">
       </head>
       <body>
@@ -252,14 +252,22 @@ describe("runAudit file output", () => {
 
     expect(existsSync(resolve(testOutputDir, "scorecard.json"))).toBe(true);
     expect(existsSync(resolve(testOutputDir, "report.md"))).toBe(true);
+    expect(existsSync(resolve(testOutputDir, "report.html"))).toBe(true);
 
     const rawScorecard = readFileSync(resolve(testOutputDir, "scorecard.json"), "utf-8");
     const data = JSON.parse(rawScorecard) as any;
     expect(data.tool).toBe("OpenGrowth");
-    expect(data.version).toBe("0.5.0");
+    expect(data.version).toBe("0.6.0");
     expect(data.url).toBe("https://example.com");
     expect(data.pageData).toBeDefined();
-    expect(data.pageData?.title).toBe("Mock Page");
+    expect(data.pageData?.title).toBe("Mock Page <script>alert(1)</script>");
+
+    const htmlReport = readFileSync(resolve(testOutputDir, "report.html"), "utf-8");
+    expect(htmlReport).toContain("OpenGrowth Audit Report");
+    expect(htmlReport).toContain("Content Strategy");
+    expect(htmlReport).toContain("Ad Strategy");
+    expect(htmlReport).not.toContain("<script>alert(1)</script>");
+    expect(htmlReport).toContain("Mock Page &lt;script&gt;alert(1)&lt;/script&gt;");
     expect(data.pageData?.headings[0]).toEqual({ level: 1, text: "Value Prop Headline" });
     // v0.3: verify rule results are persisted
     expect(Array.isArray(data.ruleResults)).toBe(true);

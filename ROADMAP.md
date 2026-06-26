@@ -51,11 +51,11 @@ OpenGrowth becomes the **Lighthouse for growth** — the standard open-source to
 
 ## v0.6 — HTML Reports
 
-- [ ] Report template system
-- [ ] Standalone HTML report generation
-- [ ] Score visualizations (charts, gauges)
-- [ ] Section-by-section breakdown
-- [ ] Shareable single-file reports
+- [x] Report template system
+- [x] Standalone HTML report generation
+- [x] Score visualizations (charts, gauges)
+- [x] Section-by-section breakdown
+- [x] Shareable single-file reports
 
 ## v0.7 — GitHub Action
 

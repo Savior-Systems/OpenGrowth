@@ -12,6 +12,7 @@ import { generateContentStrategy } from "../strategy/content-strategy.js";
 import { generateContentStrategyMarkdown } from "../strategy/markdown.js";
 import { generateAdStrategy } from "../ads/ad-angle-generator.js";
 import { generateAdStrategyMarkdown } from "../ads/markdown.js";
+import { generateHtmlReport } from "../report/html.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -165,7 +166,7 @@ export function runHeuristicAudit(
 
   return {
     tool: "OpenGrowth",
-    version: "0.5.0",
+    version: "0.6.0",
     url,
     context: context || "No business context provided.",
     generatedAt: new Date().toISOString(),
@@ -486,6 +487,23 @@ export async function runAudit(options: {
     const adStrategyMdPath = resolve(outputDir, "ad-strategy.md");
     writeFileSync(adStrategyMdPath, generateAdStrategyMarkdown(fullAdStrategy), "utf-8");
 
+    const htmlReportPath = resolve(outputDir, "report.html");
+    const htmlReportInput = {
+      tool: audit.tool,
+      version: audit.version,
+      url: audit.url,
+      context: audit.context,
+      generatedAt: audit.generatedAt,
+      score: audit.score,
+      findings: audit.findings,
+      ruleResults: audit.ruleResults,
+      nextSteps: audit.nextSteps,
+      pageData: audit.pageData,
+      contentStrategy: fullStrategy,
+      adStrategy: fullAdStrategy,
+    };
+    writeFileSync(htmlReportPath, generateHtmlReport(htmlReportInput), "utf-8");
+
     const passedCount = audit.ruleResults.filter((r) => r.passed).length;
     const totalRules = audit.ruleResults.length;
     const highFindingsCount = audit.findings.filter(
@@ -502,11 +520,13 @@ export async function runAudit(options: {
     console.log(`  High Priority Findings:  ${highFindingsCount}`);
     console.log(`  Content Strategy:        Generated`);
     console.log(`  Ad Strategy:             Generated`);
+    console.log(`  HTML Report:             Generated`);
     console.log(`  Output Directory:        ${options.output}`);
     console.log("");
     console.log("  ── Output Files ─────────────────────────────────────");
     console.log(`  📄 ${scorecardPath}`);
     console.log(`  📄 ${reportPath}`);
+    console.log(`  📄 ${htmlReportPath}`);
     console.log(`  📄 ${ruleResultsPath}`);
     console.log(`  📄 ${pageDataPath}`);
     console.log(`  📄 ${strategyJsonPath}`);
