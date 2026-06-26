@@ -33,7 +33,7 @@ All **free**, **local-first**, and **no paid API required**.
 
 ## Features
 
-> 🏗️ **Under active development** — v0.1 coming soon.
+> 🏗️ **Under active development** — v0.1 CLI foundation is live. Real analysis coming in v0.2+.
 
 - **CLI** — Run audits from your terminal
 - **GitHub Action** — Automate growth audits in CI/CD
@@ -46,9 +46,18 @@ All **free**, **local-first**, and **no paid API required**.
 ## Quick Start
 
 ```bash
-# Coming soon
-npx opengrowth audit https://example.com
+# Clone and build
+git clone https://github.com/Savior-Systems/OpenGrowth.git
+cd OpenGrowth
+npm install
+npm run build
+
+# Run an audit
+node dist/cli.js audit https://example.com --context "Demo SaaS"
 ```
+
+> **Current version:** v0.1 CLI foundation with placeholder analysis.
+> Real crawling and rule-based scoring are planned for v0.2–v0.3.
 
 ## How It Works
 
@@ -69,7 +78,7 @@ npx opengrowth audit https://example.com
 
 | Component | Status |
 |-----------|--------|
-| CLI Foundation | 🔜 Planned |
+| CLI Foundation | ✅ v0.1 |
 | Web Crawler/Parser | 🔜 Planned |
 | Rule Engine | 🔜 Planned |
 | Content Strategy | 🔜 Planned |

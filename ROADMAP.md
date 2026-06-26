@@ -10,12 +10,12 @@ OpenGrowth becomes the **Lighthouse for growth** — the standard open-source to
 
 ## v0.1 — CLI Foundation
 
-- [ ] Project scaffolding (Node.js, TypeScript)
-- [ ] CLI skeleton with `opengrowth` command
-- [ ] `audit` command stub (accepts URL, outputs placeholder JSON)
+- [x] Project scaffolding (Node.js, TypeScript)
+- [x] CLI skeleton with `opengrowth` command
+- [x] `audit` command stub (accepts URL, outputs placeholder JSON)
 - [ ] Config file support (`.opengrowthrc`)
-- [ ] Basic error handling and help text
-- [ ] Unit test foundation
+- [x] Basic error handling and help text
+- [x] Unit test foundation
 
 ## v0.2 — Crawler & Parser
 

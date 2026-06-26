@@ -1,0 +1,59 @@
+{
+  "name": "opengrowth",
+  "version": "0.1.0",
+  "description": "Open-source growth operating system for website audits, content strategy, ad angles, and growth execution roadmaps.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Savior Systems",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Savior-Systems/OpenGrowth.git"
+  },
+  "homepage": "https://github.com/Savior-Systems/OpenGrowth",
+  "bugs": {
+    "url": "https://github.com/Savior-Systems/OpenGrowth/issues"
+  },
+  "keywords": [
+    "growth",
+    "seo",
+    "audit",
+    "content-strategy",
+    "marketing",
+    "lighthouse",
+    "cli",
+    "open-source"
+  ],
+  "bin": {
+    "opengrowth": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "verify": "npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "commander": "^13.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@types/node": "^22.15.0",
+    "eslint": "^9.28.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0",
+    "typescript-eslint": "^8.33.0",
+    "vitest": "^3.2.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -38,6 +38,8 @@ out/
 # ---------------------------------------------------------------------------
 local-output/
 local-reports/
+opengrowth-report/
+.test-output-temp/
 *.local.html
 *.local.json
 
