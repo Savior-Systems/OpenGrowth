@@ -19,27 +19,27 @@ OpenGrowth becomes the **Lighthouse for growth** — the standard open-source to
 
 ## v0.2 — Crawler & Parser
 
-- [ ] URL fetcher (HTTP/HTTPS with redirects, timeouts)
-- [ ] HTML parser (title, meta tags, headings, links, images)
-- [ ] Text content extractor (body copy, CTAs, navigation)
-- [ ] Structured page data model
-- [ ] Parser test fixtures
+- [x] URL fetcher (HTTP/HTTPS with redirects, timeouts)
+- [x] HTML parser (title, meta tags, headings, links, images)
+- [x] Text content extractor (body copy, CTAs, navigation)
+- [x] Structured page data model
+- [x] Parser test fixtures
 
 ## v0.3 — Rule Engine & Scoring
 
-- [ ] Rule engine architecture (modular, extensible)
-- [ ] Core rule packs: SEO basics, content quality, conversion signals
-- [ ] Scoring system (0–100 per category, overall score)
-- [ ] Rule documentation format
-- [ ] Custom rule pack loading
+- [x] Rule engine architecture (modular, extensible)
+- [x] Core rule packs: SEO basics, content quality, conversion signals
+- [x] Scoring system (0–100 per category, overall score)
+- [x] Rule documentation format
+- [x] Custom rule pack loading
 
 ## v0.4 — Content Strategy Generator
 
-- [ ] Topic cluster extraction from page content
-- [ ] Content gap analysis (rule-based)
-- [ ] Content calendar suggestions
-- [ ] Distribution channel recommendations
-- [ ] Plain-text business context input support
+- [x] Topic cluster extraction from page content
+- [x] Content gap analysis (rule-based)
+- [x] Content calendar suggestions
+- [x] Distribution channel recommendations
+- [x] Plain-text business context input support
 
 ## v0.5 — Ad Angle Generator
 

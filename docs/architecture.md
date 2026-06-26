@@ -1,6 +1,6 @@
 # OpenGrowth Architecture
 
-> Planning document — will evolve as implementation progresses.
+> System Architecture — current version v0.4.0.
 
 ## System Overview
 

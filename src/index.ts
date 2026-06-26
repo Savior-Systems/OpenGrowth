@@ -27,3 +27,10 @@ export type { Rule, RuleResult, RuleCategory } from "./rules/types.js";
 // Scoring exports
 export { calculateScore, CATEGORY_WEIGHTS } from "./scoring/calculator.js";
 export type { ScoreCard } from "./scoring/calculator.js";
+
+// Strategy exports
+export * from "./strategy/types.js";
+export { extractKeywords } from "./strategy/keyword-extractor.js";
+export { generateContentStrategy } from "./strategy/content-strategy.js";
+export { generateContentCalendar } from "./strategy/calendar.js";
+export { generateContentStrategyMarkdown } from "./strategy/markdown.js";

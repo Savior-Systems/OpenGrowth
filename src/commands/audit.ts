@@ -8,6 +8,8 @@ import { getAllRules } from "../rules/registry.js";
 import { runRules } from "../rules/runner.js";
 import { RuleResult } from "../rules/types.js";
 import { calculateScore } from "../scoring/calculator.js";
+import { generateContentStrategy } from "../strategy/content-strategy.js";
+import { generateContentStrategyMarkdown } from "../strategy/markdown.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -43,6 +45,31 @@ export interface AuditResult {
   ruleResults: RuleResult[];
   nextSteps: string[];
   pageData?: PageData;
+  contentStrategy?: {
+    summary: string;
+    topicClusters: Array<{
+      name: string;
+      intent: string;
+      priority: string;
+      reason: string;
+      keywords: string[];
+    }>;
+    contentGaps: Array<{
+      type: string;
+      severity: string;
+      title: string;
+      evidence: string;
+      recommendation: string;
+    }>;
+    calendar30Days: Array<{
+      day: number;
+      title: string;
+      format: string;
+      intent: string;
+      priority: string;
+      goal: string;
+    }>;
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -92,9 +119,16 @@ export function runHeuristicAudit(
     nextSteps.push("Excellent baseline! Continue refining content and conversion elements.");
   }
 
+  const contentStrategyData = generateContentStrategy({
+    page: pageData,
+    context,
+    ruleResults,
+    scorecard: scoreCard,
+  });
+
   return {
     tool: "OpenGrowth",
-    version: "0.3.0",
+    version: "0.4.0",
     url,
     context: context || "No business context provided.",
     generatedAt: new Date().toISOString(),
@@ -114,6 +148,18 @@ export function runHeuristicAudit(
     ruleResults,
     nextSteps,
     pageData,
+    contentStrategy: {
+      summary: contentStrategyData.summary,
+      topicClusters: contentStrategyData.topicClusters.map((c) => ({
+        name: c.name,
+        intent: c.intent,
+        priority: c.priority,
+        reason: c.reason,
+        keywords: c.keywords,
+      })),
+      contentGaps: contentStrategyData.contentGaps,
+      calendar30Days: contentStrategyData.calendar30Days,
+    },
   };
 }
 
@@ -336,6 +382,14 @@ export async function runAudit(options: {
     console.log("  ⚙️  Running rule engine...");
     const audit = runHeuristicAudit(normalizedUrl, options.context, pageData);
 
+    // Generate the full strategy report for separate strategy files
+    const fullStrategy = generateContentStrategy({
+      page: pageData,
+      context: options.context,
+      ruleResults: audit.ruleResults,
+      scorecard: { overall: audit.score.overall, categories: audit.score.categories },
+    });
+
     // 5. Print summary to terminal
     printAuditSummary(audit);
 
@@ -357,11 +411,36 @@ export async function runAudit(options: {
     const pageDataPath = resolve(outputDir, "page-data.json");
     writeFileSync(pageDataPath, JSON.stringify(audit.pageData, null, 2), "utf-8");
 
+    const strategyJsonPath = resolve(outputDir, "content-strategy.json");
+    writeFileSync(strategyJsonPath, JSON.stringify(fullStrategy, null, 2), "utf-8");
+
+    const strategyMdPath = resolve(outputDir, "content-strategy.md");
+    writeFileSync(strategyMdPath, generateContentStrategyMarkdown(fullStrategy), "utf-8");
+
+    const passedCount = audit.ruleResults.filter((r) => r.passed).length;
+    const totalRules = audit.ruleResults.length;
+    const highFindingsCount = audit.findings.filter(
+      (f) => f.severity === "critical" || f.severity === "high"
+    ).length;
+
+    console.log("╔══════════════════════════════════════════════════════════╗");
+    console.log("║              🚀 OpenGrowth Audit Complete               ║");
+    console.log("╚══════════════════════════════════════════════════════════╝");
+    console.log("");
+    console.log(`  URL:                     ${normalizedUrl}`);
+    console.log(`  Overall Score:           ${audit.score.overall}/100`);
+    console.log(`  Rules Passed:            ${passedCount}/${totalRules}`);
+    console.log(`  High Priority Findings:  ${highFindingsCount}`);
+    console.log(`  Content Strategy:        Generated`);
+    console.log(`  Output Directory:        ${options.output}`);
+    console.log("");
     console.log("  ── Output Files ─────────────────────────────────────");
     console.log(`  📄 ${scorecardPath}`);
     console.log(`  📄 ${reportPath}`);
     console.log(`  📄 ${ruleResultsPath}`);
     console.log(`  📄 ${pageDataPath}`);
+    console.log(`  📄 ${strategyJsonPath}`);
+    console.log(`  📄 ${strategyMdPath}`);
     console.log("");
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);

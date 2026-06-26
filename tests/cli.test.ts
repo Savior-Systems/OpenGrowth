@@ -109,7 +109,7 @@ describe("runHeuristicAudit", () => {
 
   it("returns correct version", () => {
     const audit = runHeuristicAudit("https://example.com", "", dummyPageData);
-    expect(audit.version).toBe("0.3.0");
+    expect(audit.version).toBe("0.4.0");
   });
 
   it("includes ruleResults array from rule engine", () => {
@@ -254,9 +254,9 @@ describe("runAudit file output", () => {
     expect(existsSync(resolve(testOutputDir, "report.md"))).toBe(true);
 
     const rawScorecard = readFileSync(resolve(testOutputDir, "scorecard.json"), "utf-8");
-    const data = JSON.parse(rawScorecard) as AuditResult;
+    const data = JSON.parse(rawScorecard) as any;
     expect(data.tool).toBe("OpenGrowth");
-    expect(data.version).toBe("0.3.0");
+    expect(data.version).toBe("0.4.0");
     expect(data.url).toBe("https://example.com");
     expect(data.pageData).toBeDefined();
     expect(data.pageData?.title).toBe("Mock Page");
@@ -264,5 +264,25 @@ describe("runAudit file output", () => {
     // v0.3: verify rule results are persisted
     expect(Array.isArray(data.ruleResults)).toBe(true);
     expect(data.ruleResults.length).toBeGreaterThan(0);
+
+    // v0.4: verify content strategy files and structure
+    expect(existsSync(resolve(testOutputDir, "content-strategy.json"))).toBe(true);
+    expect(existsSync(resolve(testOutputDir, "content-strategy.md"))).toBe(true);
+
+    const rawStrategy = readFileSync(resolve(testOutputDir, "content-strategy.json"), "utf-8");
+    const strategy = JSON.parse(rawStrategy);
+    expect(strategy).toHaveProperty("topicClusters");
+    expect(strategy.topicClusters.length).toBeGreaterThanOrEqual(5);
+    expect(strategy).toHaveProperty("calendar30Days");
+    expect(strategy.calendar30Days.length).toBe(30);
+
+    const mdStrategy = readFileSync(resolve(testOutputDir, "content-strategy.md"), "utf-8");
+    expect(mdStrategy).toContain("30-Day Content Calendar");
+
+    // Check scorecard includes contentStrategy snippet
+    expect(data).toHaveProperty("contentStrategy");
+    expect(data.contentStrategy).toHaveProperty("topicClusters");
+    expect(data.contentStrategy).toHaveProperty("calendar30Days");
+    expect(data.contentStrategy.calendar30Days.length).toBe(30);
   });
 });

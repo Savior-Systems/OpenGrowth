@@ -33,7 +33,7 @@ All **free**, **local-first**, and **no paid API required**.
 
 ## Features
 
-> 🏗️ **Under active development** — v0.3 Rule Engine & Scoring is live. Content strategy coming in v0.4+.
+> 🏗️ **Under active development** — v0.4 Content Strategy Generator is live.
 
 - **CLI** — Run audits from your terminal
 - **GitHub Action** — Automate growth audits in CI/CD
@@ -56,8 +56,8 @@ npm run build
 node dist/cli.js audit https://example.com --context "Demo SaaS"
 ```
 
-> **Current version:** v0.3 — real crawler, rule engine, and weighted scoring.
-> Four output files per audit: `scorecard.json`, `report.md`, `rule-results.json`, `page-data.json`.
+> **Current version:** v0.4 — content strategy generator, real crawler, rule engine, and weighted scoring.
+> Six output files per audit: `scorecard.json`, `report.md`, `rule-results.json`, `page-data.json`, `content-strategy.json`, and `content-strategy.md`.
 
 ## How It Works
 
@@ -80,8 +80,8 @@ node dist/cli.js audit https://example.com --context "Demo SaaS"
 |-----------|--------|
 | CLI Foundation | ✅ v0.1 |
 | Web Crawler/Parser | ✅ v0.2 |
-| Rule Engine & Scoring | ✅ v0.3 |
-| Content Strategy | 🔜 Planned v0.4 |
+| Rule Engine & Scoring | ✅ v0.3.1 |
+| Content Strategy | ✅ v0.4 |
 | Ad Angle Generator | 🔜 Planned |
 | HTML Reports | 🔜 Planned |
 | GitHub Action | 🔜 Planned |
