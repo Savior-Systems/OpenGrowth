@@ -24,7 +24,7 @@ function extractMatches(text: string, searchTerms: string[]): string[] {
 
   for (const term of searchTerms) {
     // Escape term for regex, match whole words/phrases
-    const escaped = term.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+    const escaped = term.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
     const regex = new RegExp(`\\b${escaped}\\b`, "i");
     if (regex.test(normText)) {
       found.add(term);

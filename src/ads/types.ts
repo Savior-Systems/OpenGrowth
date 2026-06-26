@@ -1,7 +1,3 @@
-import type { PageData } from "../models/page-data.js";
-import type { RuleResult } from "../rules/types.js";
-import type { ScoreCard } from "../scoring/calculator.js";
-import type { ContentStrategy } from "../strategy/types.js";
 
 export type AdPlatform =
   | "facebook"

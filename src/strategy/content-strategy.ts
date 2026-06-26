@@ -10,8 +10,6 @@ import type {
   FAQIdea,
   DistributionIdea,
   ContentStrategy,
-  SearchIntent,
-  ContentFormat,
 } from "./types.js";
 
 /**
@@ -67,7 +65,6 @@ export function generateTopicClusters(input: {
   const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   const t = cap(primaryTopic);
-  const st = cap(secondaryTopic);
   const aud = cap(audience);
 
   // We will generate 6 topic clusters to cover all requirements

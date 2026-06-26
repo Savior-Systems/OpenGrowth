@@ -1,11 +1,5 @@
 import type { AdCopyVariant, AdInputData, AudienceSegment, AdHook, ValueProposition } from "./types.js";
 
-/**
- * Capitalizes the first letter of a string.
- */
-function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
 
 /**
  * Generates at least 24 deterministic ad copy variants across Facebook/Instagram,
@@ -19,11 +13,6 @@ export function generateAdCopyVariants(input: {
 }): AdCopyVariant[] {
   const { adInputs } = input;
   const topic = adInputs.primaryTopic;
-  const capTopic = capitalize(topic);
-  const problem = adInputs.problemTerms[0] || "inefficient manual audits";
-  const outcome = adInputs.outcomeTerms[0] || "boost page conversion";
-  const audience = adInputs.audienceTerms[0] || "growth teams";
-  const weakArea = adInputs.weakAreas[0] || "conversion leaks";
 
   const variants: AdCopyVariant[] = [];
 

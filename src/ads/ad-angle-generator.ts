@@ -14,7 +14,6 @@ import type {
   ShortVideoConcept,
   AdInputData,
 } from "./types.js";
-
 /**
  * Capitalizes the first letter of a string.
  */
@@ -27,7 +26,6 @@ function capitalize(str: string): string {
  */
 export function generateAudienceSegments(input: AdInputData): AudienceSegment[] {
   const topic = input.primaryTopic;
-  const capTopic = capitalize(topic);
   const problem = input.problemTerms[0] || "unclear prioritization";
   const outcome = input.outcomeTerms[0] || "accelerate growth";
 
@@ -54,7 +52,7 @@ export function generateAudienceSegments(input: AdInputData): AudienceSegment[] 
       painPoint: `Spending too much time manually analyzing client sites and compiling audit reports.`,
       desiredOutcome: `Instantly generate white-label growth scorecards, content maps, and ad copy plans.`,
       messageFocus: `Emphasize time savings, standard workflows, and professional growth deliverables.`,
-      suggestedPlatforms: ["linkedin", "email" as any], // Cast email since it fits standard campaigns
+      suggestedPlatforms: ["linkedin", "google-search"],
     },
     {
       name: "Developer-Founder",
@@ -79,8 +77,6 @@ export function generateAudienceSegments(input: AdInputData): AudienceSegment[] 
  * Generates at least 5 value propositions based on inputs.
  */
 export function generateValuePropositions(input: AdInputData): ValueProposition[] {
-  const topic = input.primaryTopic;
-  const capTopic = capitalize(topic);
   const weakArea = input.weakAreas[0] || "Growth bottlenecks";
 
   return [
@@ -123,7 +119,6 @@ export function generateValuePropositions(input: AdInputData): ValueProposition[
 export function generateHooks(input: AdInputData): AdHook[] {
   const topic = input.primaryTopic;
   const capTopic = capitalize(topic);
-  const problem = input.problemTerms[0] || "manual setup";
   const outcome = input.outcomeTerms[0] || "improve conversion";
   const audience = input.audienceTerms[0] || "growth teams";
   const weakArea = input.weakAreas[0] || "conversion leaks";
@@ -260,10 +255,8 @@ export function generateHooks(input: AdInputData): AdHook[] {
 /**
  * Generates at least 8 short video/reel concepts.
  */
-export function generateShortVideoConcepts(input: AdInputData): ShortVideoConcept[] {
-  const topic = input.primaryTopic;
-  const problem = input.problemTerms[0] || "unclear growth prioritisation";
-  const weakArea = input.weakAreas[0] || "trust signals";
+export function generateShortVideoConcepts(_input: AdInputData): ShortVideoConcept[] {
+  // No-op
 
   return [
     {
@@ -384,14 +377,7 @@ export function generateShortVideoConcepts(input: AdInputData): ShortVideoConcep
   ];
 }
 
-/**
- * Generates at least 5 carousel concepts.
- */
-export function generateCarouselConcepts(input: AdInputData): CarouselConcept[] {
-  const topic = input.primaryTopic;
-  const capTopic = capitalize(topic);
-  const weakArea = input.weakAreas[0] || "conversion leaks";
-
+export function generateCarouselConcepts(_input: AdInputData): CarouselConcept[] {
   return [
     {
       title: "5 Landing Page Mistakes Killing Your Conversion Rate",

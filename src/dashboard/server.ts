@@ -19,7 +19,7 @@ import {
   renderAuditDetail,
   renderError
 } from "./templates.js";
-import { runOpenGrowthAudit } from "../audit/run-audit.js";
+import { runOpenGrowthAudit, AuditResult } from "../audit/run-audit.js";
 
 /**
  * Starts the native local dashboard HTTP server.
@@ -97,7 +97,8 @@ export async function startDashboardServer(config: DashboardConfig): Promise<Ser
               await appendAuditRecord(dataDir, record);
               res.writeHead(302, { Location: `/audit/${auditId}` });
               res.end();
-            } catch (err: any) {
+            } catch (err) {
+              const errorMessage = err instanceof Error ? err.message : String(err);
               // Failure record
               const record: DashboardAuditRecord = {
                 id: auditId,
@@ -106,16 +107,17 @@ export async function startDashboardServer(config: DashboardConfig): Promise<Ser
                 createdAt: new Date().toISOString(),
                 status: "failed",
                 outputDirectory,
-                errorMessage: err.message || String(err)
+                errorMessage
               };
 
               await appendAuditRecord(dataDir, record);
               res.writeHead(302, { Location: `/audit/${auditId}` });
               res.end();
             }
-          } catch (err: any) {
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
             res.writeHead(500, { "Content-Type": "text/html; charset=utf-8" });
-            res.end(renderError(`Failed to parse request: ${err.message}`));
+            res.end(renderError(`Failed to parse request: ${msg}`));
           }
         });
         return;
@@ -138,7 +140,7 @@ export async function startDashboardServer(config: DashboardConfig): Promise<Ser
           return;
         }
 
-        let scorecardData: any = null;
+        let scorecardData: AuditResult | null = null;
         if (record.status === "completed") {
           try {
             const scorecardPath = resolve(process.cwd(), record.outputDirectory, "scorecard.json");
@@ -203,9 +205,10 @@ export async function startDashboardServer(config: DashboardConfig): Promise<Ser
       // 404 Route
       res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
       res.end(renderError("Page not found."));
-    } catch (err: any) {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       res.writeHead(500, { "Content-Type": "text/html; charset=utf-8" });
-      res.end(renderError(`Internal server error: ${err.message}`));
+      res.end(renderError(`Internal server error: ${msg}`));
     }
   });
 

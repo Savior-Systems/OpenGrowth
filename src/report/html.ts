@@ -2,7 +2,7 @@ import type { PageData } from "../models/page-data.js";
 import type { RuleResult } from "../rules/types.js";
 import type { ContentStrategy } from "../strategy/types.js";
 import type { AdStrategy } from "../ads/types.js";
-import { escapeHtml, clampScore, scoreLabel, formatList, slugify } from "./html-utils.js";
+import { escapeHtml, clampScore, scoreLabel } from "./html-utils.js";
 
 export interface HtmlReportInput {
   tool: string;

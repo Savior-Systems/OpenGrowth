@@ -3,9 +3,7 @@ import type { CreativeDirection, AdInputData } from "./types.js";
 /**
  * Generates at least 5 text-based creative directions based on ad inputs.
  */
-export function generateCreativeDirections(input: AdInputData): CreativeDirection[] {
-  const topic = input.primaryTopic;
-  const weakArea = input.weakAreas[0] || "website friction";
+export function generateCreativeDirections(_input: AdInputData): CreativeDirection[] {
 
   return [
     {

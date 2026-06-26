@@ -1,5 +1,6 @@
 import { escapeHtml } from "../report/html-utils.js";
 import { DashboardAuditRecord } from "./types.js";
+import { AuditResult } from "../audit/run-audit.js";
 
 // Premium CSS stylesheet for all pages
 const CSS_STYLE = `
@@ -600,7 +601,7 @@ export function renderHome(records: DashboardAuditRecord[]): string {
   `;
 }
 
-export function renderAuditDetail(record: DashboardAuditRecord, scorecardData?: any): string {
+export function renderAuditDetail(record: DashboardAuditRecord, scorecardData?: AuditResult | null): string {
   const dateStr = new Date(record.createdAt).toLocaleString();
   
   let scoreCardHtml = "";
@@ -657,7 +658,7 @@ export function renderAuditDetail(record: DashboardAuditRecord, scorecardData?: 
     `;
 
     if (scorecardData.findings && scorecardData.findings.length > 0) {
-      const findingsList = scorecardData.findings.map((f: any) => `
+      const findingsList = scorecardData.findings.map((f) => `
         <div class="finding-item ${f.severity}">
           <div class="finding-header">
             <span class="finding-title">${escapeHtml(f.title)}</span>

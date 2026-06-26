@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { existsSync, rmSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, rmSync } from "node:fs";
+import { Server } from "node:http";
 import { join, resolve } from "node:path";
 import { Command } from "commander";
 import {
@@ -188,7 +189,7 @@ describe("Dashboard Templates XSS Safety", () => {
 });
 
 describe("Dashboard HTTP Server", () => {
-  let server: any;
+  let server: Server;
   const port = 3999;
   const serverDataDir = ".test-server-data";
 
@@ -209,7 +210,7 @@ describe("Dashboard HTTP Server", () => {
   it("should return ok and version on /health", async () => {
     const response = await fetch(`http://localhost:${port}/health`);
     expect(response.status).toBe(200);
-    const json = await response.json() as any;
+    const json = await response.json() as { ok: boolean; tool: string; version: string };
     expect(json.ok).toBe(true);
     expect(json.tool).toBe("OpenGrowth");
     expect(json.version).toBe("1.0.0-rc.1");

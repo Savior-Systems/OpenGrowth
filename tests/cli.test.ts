@@ -255,7 +255,7 @@ describe("runAudit file output", () => {
     expect(existsSync(resolve(testOutputDir, "report.html"))).toBe(true);
 
     const rawScorecard = readFileSync(resolve(testOutputDir, "scorecard.json"), "utf-8");
-    const data = JSON.parse(rawScorecard) as any;
+    const data = JSON.parse(rawScorecard) as AuditResult;
     expect(data.tool).toBe("OpenGrowth");
     expect(data.version).toBe("1.0.0-rc.1");
     expect(data.url).toBe("https://example.com");

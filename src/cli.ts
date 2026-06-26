@@ -62,8 +62,9 @@ program
       console.log(`\n  🟢 Dashboard running at: http://localhost:${port}`);
       console.log(`  📂 Data Directory:         ${dataDir}`);
       console.log(`  🛑 Press Ctrl+C to stop the server\n`);
-    } catch (err: any) {
-      console.error(`\n  ❌ Failed to start dashboard: ${err.message}\n`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`\n  ❌ Failed to start dashboard: ${msg}\n`);
       process.exit(1);
     }
   });

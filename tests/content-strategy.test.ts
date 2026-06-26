@@ -8,7 +8,6 @@ import {
   detectContentGaps,
   generateTopicClusters,
 } from "../src/strategy/content-strategy.js";
-import { generateContentCalendar } from "../src/strategy/calendar.js";
 import { generateContentStrategyMarkdown } from "../src/strategy/markdown.js";
 
 // Helper fixture factories
