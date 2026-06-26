@@ -1,26 +1,28 @@
 {
   "name": "opengrowth",
-  "version": "0.9.0",
+  "version": "1.0.0-rc.1",
   "description": "Open-source growth operating system for website audits, content strategy, ad angles, and growth execution roadmaps.",
   "type": "module",
   "license": "MIT",
   "author": "Savior Systems",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Savior-Systems/OpenGrowth.git"
+    "url": "git+https://github.com/Savior-Systems/OpenGrowth.git"
   },
-  "homepage": "https://github.com/Savior-Systems/OpenGrowth",
+  "homepage": "https://github.com/Savior-Systems/OpenGrowth#readme",
   "bugs": {
     "url": "https://github.com/Savior-Systems/OpenGrowth/issues"
   },
   "keywords": [
     "growth",
-    "seo",
-    "audit",
-    "content-strategy",
     "marketing",
-    "lighthouse",
+    "seo",
+    "content-strategy",
+    "ad-strategy",
+    "website-audit",
+    "conversion",
     "cli",
+    "github-action",
     "open-source"
   ],
   "bin": {
@@ -29,7 +31,13 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "docs",
+    "examples",
+    "action.yml"
   ],
   "scripts": {
     "dev": "tsx src/cli.ts",

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-rc.1] - Unreleased
+
+### Added
+- Launch checklist (`docs/launch-checklist.md`).
+- npm publish checklist (`docs/npm-publish-checklist.md`).
+- v1 release notes draft (`docs/v1-release-notes.md`).
+- Security review document (`docs/security-review.md`).
+- Project status overview (`docs/project-status.md`).
+
+### Changed
+- Bumped version to `1.0.0-rc.1`.
+- Hardened `package.json` metadata (repository URL format, expanded keywords, npm `files` list).
+- Updated `SECURITY.md` supported versions table.
+
 ## [0.9.0] - Unreleased
 
 ### Added

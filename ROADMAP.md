@@ -82,12 +82,14 @@ OpenGrowth becomes the **Lighthouse for growth** — the standard open-source to
 - [x] Report gallery guidelines & example templates
 
 
-## v1.0 — Public Launch
+## v1.0 — Launch Candidate Hardening
 
-- [ ] Documentation polish
-- [ ] Performance optimization
-- [ ] Security audit
-- [ ] npm publish
+- [x] Package metadata hardened
+- [x] Documentation polish (launch checklist, npm publish guide, release notes, security review, project status)
+- [x] Security review completed
+- [x] Version bumped to `1.0.0-rc.1`
+- [x] All tests updated and passing
+- [ ] npm publish (pending user approval)
 - [ ] GitHub Marketplace listing (Action)
 - [ ] Community launch (HN, Reddit, Twitter/X, Dev.to)
 

@@ -99,8 +99,8 @@ describe("OpenGrowth v0.9 Examples and Launch Assets", () => {
     }
   });
 
-  it("12. package version is 0.9.0", () => {
+  it("12. package version is 1.0.0-rc.1", () => {
     const packageJson = JSON.parse(readFileSync(resolve(rootDir, "package.json"), "utf-8"));
-    expect(packageJson.version).toBe("0.9.0");
+    expect(packageJson.version).toBe("1.0.0-rc.1");
   });
 });

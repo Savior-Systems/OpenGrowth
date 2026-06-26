@@ -37,7 +37,7 @@ export async function startDashboardServer(config: DashboardConfig): Promise<Ser
       // GET /health
       if (pathname === "/health" && method === "GET") {
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ ok: true, tool: "OpenGrowth", version: "0.9.0" }));
+        res.end(JSON.stringify({ ok: true, tool: "OpenGrowth", version: "1.0.0-rc.1" }));
         return;
       }
 

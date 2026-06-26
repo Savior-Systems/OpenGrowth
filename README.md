@@ -5,9 +5,9 @@
   </p>
   <p align="center">
     <!-- Status Badge Placeholders -->
-    <img src="https://img.shields.io/badge/status-active_development-orange" alt="Status" />
+    <img src="https://img.shields.io/badge/status-launch_candidate-brightgreen" alt="Status" />
     <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
-    <img src="https://img.shields.io/badge/version-v0.9.0-blue" alt="Version" />
+    <img src="https://img.shields.io/badge/version-v1.0.0--rc.1-blue" alt="Version" />
   </p>
   <p align="center">
     <a href="#features">Features</a> •
@@ -35,7 +35,7 @@ Think of it as **Lighthouse for growth** — but instead of just performance sco
 
 All **free**, **local-first**, and **no paid API required**.
 
-> 🏗️ **Under active development** — v0.9 examples and launch assets are live.
+> 🎯 **v1.0 Launch Candidate** — All core features are implemented, tested, and documented.
 
 ---
 
@@ -58,7 +58,7 @@ All **free**, **local-first**, and **no paid API required**.
 ## Quick Start
 
 ### 1. Build from Source
-Ensure you have Node.js 18+ or 20+ installed.
+Ensure you have Node.js 20+ installed.
 ```bash
 git clone https://github.com/Savior-Systems/OpenGrowth.git
 cd OpenGrowth
@@ -142,8 +142,8 @@ Want to see OpenGrowth outputs without running a local audit? Explore the curate
 - [x] v0.6 — HTML Reports
 - [x] v0.7 — GitHub Action
 - [x] v0.8 — Self-Hosted Dashboard
-- [x] v0.9 — Examples & Launch Assets (Current)
-- [ ] v1.0 — Public Launch & Hardening
+- [x] v0.9 — Examples & Launch Assets
+- [x] v1.0 — Launch Candidate Hardening (Current)
 
 See [ROADMAP.md](./ROADMAP.md) for full task details.
 

@@ -61,7 +61,7 @@ const mockRuleResults: RuleResult[] = [
 
 const mockInput: HtmlReportInput = {
   tool: "OpenGrowth",
-  version: "0.9.0",
+  version: "1.0.0-rc.1",
   url: "https://mysaastool.com",
   context: "SaaS customer feedback platform",
   generatedAt: "2026-06-27T00:00:00.000Z",
