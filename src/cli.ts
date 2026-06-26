@@ -10,7 +10,7 @@ program
   .description(
     "Open-source growth operating system — audit any website for growth, content, ads, and conversion.",
   )
-  .version("0.6.0");
+  .version("0.7.0");
 
 program
   .command("audit")

@@ -1,0 +1,154 @@
+name: 'OpenGrowth Audit'
+description: 'Run OpenGrowth website growth audits in GitHub Actions.'
+author: 'Savior Systems'
+branding:
+  icon: 'trending-up'
+  color: 'green'
+
+inputs:
+  url:
+    description: 'Website URL to audit.'
+    required: true
+  context:
+    description: 'Plain-text business context for strategy generation.'
+    required: false
+    default: ''
+  output:
+    description: 'Output directory for generated reports.'
+    required: false
+    default: 'opengrowth-report'
+  min-score:
+    description: 'Minimum acceptable OpenGrowth overall score. Set to 0 to disable threshold failure.'
+    required: false
+    default: '0'
+
+outputs:
+  overall-score:
+    description: 'Overall OpenGrowth score.'
+    value: ${{ steps.parse-scorecard.outputs.overall-score }}
+  rules-passed:
+    description: 'Number of rules passed.'
+    value: ${{ steps.parse-scorecard.outputs.rules-passed }}
+  rules-total:
+    description: 'Total number of rules evaluated.'
+    value: ${{ steps.parse-scorecard.outputs.rules-total }}
+  high-priority-findings:
+    description: 'Number of high-priority findings.'
+    value: ${{ steps.parse-scorecard.outputs.high-priority-findings }}
+  report-path:
+    description: 'Path to generated HTML report.'
+    value: ${{ steps.parse-scorecard.outputs.report-path }}
+  output-directory:
+    description: 'Directory containing generated report files.'
+    value: ${{ steps.parse-scorecard.outputs.output-directory }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: |
+        if [ -f "package-lock.json" ]; then
+          npm ci
+        else
+          npm install
+        fi
+
+    - name: Build OpenGrowth CLI
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: npm run build
+
+    - name: Run OpenGrowth Audit
+      shell: bash
+      env:
+        URL: ${{ inputs.url }}
+        CONTEXT: ${{ inputs.context }}
+        OUTPUT: ${{ inputs.output }}
+      run: |
+        node "${{ github.action_path }}/dist/cli.js" audit "$URL" --context "$CONTEXT" --output "$OUTPUT"
+
+    - name: Parse Scorecard and Set Outputs
+      id: parse-scorecard
+      shell: bash
+      env:
+        OUTPUT: ${{ inputs.output }}
+        MIN_SCORE: ${{ inputs.min-score }}
+      run: |
+        node -e '
+        const fs = require("fs");
+        const path = require("path");
+
+        const outputDir = process.env.OUTPUT || "opengrowth-report";
+        const scorecardPath = path.join(process.cwd(), outputDir, "scorecard.json");
+
+        if (!fs.existsSync(scorecardPath)) {
+          console.error("Error: scorecard.json not found at " + scorecardPath);
+          process.exit(1);
+        }
+
+        const data = JSON.parse(fs.readFileSync(scorecardPath, "utf8"));
+        const overallScore = data.score.overall;
+        const totalRules = data.ruleResults.length;
+        const passedRules = data.ruleResults.filter(r => r.passed).length;
+        const highPriorityFindings = data.findings.filter(f => f.severity === "critical" || f.severity === "high").length;
+        const reportPath = path.join(outputDir, "report.html");
+
+        // Write to GITHUB_OUTPUT
+        const githubOutput = process.env.GITHUB_OUTPUT;
+        if (githubOutput) {
+          fs.appendFileSync(githubOutput, "overall-score=" + overallScore + "\n");
+          fs.appendFileSync(githubOutput, "rules-passed=" + passedRules + "\n");
+          fs.appendFileSync(githubOutput, "rules-total=" + totalRules + "\n");
+          fs.appendFileSync(githubOutput, "high-priority-findings=" + highPriorityFindings + "\n");
+          fs.appendFileSync(githubOutput, "report-path=" + reportPath + "\n");
+          fs.appendFileSync(githubOutput, "output-directory=" + outputDir + "\n");
+        }
+
+        // Write to GITHUB_STEP_SUMMARY
+        const stepSummary = process.env.GITHUB_STEP_SUMMARY;
+        if (stepSummary) {
+          const summaryMarkdown = `
+        # OpenGrowth Audit Summary
+
+        - **URL:** ${data.url}
+        - **Overall Score:** ${overallScore}/100
+        - **Rules Passed:** ${passedRules}/${totalRules}
+        - **High Priority Findings:** ${highPriorityFindings}
+        - **HTML Report:** \`${reportPath}\`
+        - **Output Directory:** \`${outputDir}\`
+
+        ## Generated Files
+        - \`scorecard.json\`
+        - \`report.md\`
+        - \`report.html\`
+        - \`page-data.json\`
+        - \`rule-results.json\`
+        - \`content-strategy.json\`
+        - \`content-strategy.md\`
+        - \`ad-strategy.json\`
+        - \`ad-strategy.md\`
+        `;
+          fs.appendFileSync(stepSummary, summaryMarkdown);
+        }
+
+        // Threshold Check
+        const minScoreStr = process.env.MIN_SCORE;
+        if (minScoreStr) {
+          const minScore = parseFloat(minScoreStr);
+          if (isNaN(minScore) || minScore < 0 || minScore > 100) {
+            console.error("Error: min-score must be a number between 0 and 100.");
+            process.exit(1);
+          }
+          if (minScore > 0 && overallScore < minScore) {
+            console.error("Error: OpenGrowth score " + overallScore + " is below min-score " + minScore + ".");
+            process.exit(1);
+          }
+        }
+        '

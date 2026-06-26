@@ -59,11 +59,11 @@ OpenGrowth becomes the **Lighthouse for growth** — the standard open-source to
 
 ## v0.7 — GitHub Action
 
-- [ ] Action manifest (`action.yml`)
-- [ ] PR comment integration
-- [ ] Score threshold checks
-- [ ] Artifact upload (HTML report)
-- [ ] Workflow examples
+- [x] Action manifest (`action.yml`)
+- [x] PR step summary integration
+- [x] Score threshold checks
+- [x] Artifact upload examples
+- [x] Workflow examples
 
 ## v0.8 — Self-Hosted Dashboard
 

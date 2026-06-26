@@ -1,6 +1,6 @@
 # OpenGrowth Architecture
 
-> System Architecture — current version v0.6.0.
+> System Architecture — current version v0.7.0.
 
 ## System Overview
 

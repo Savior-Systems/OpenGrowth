@@ -1,0 +1,26 @@
+name: OpenGrowth Audit with Threshold
+
+on:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run OpenGrowth Audit
+        uses: Savior-Systems/OpenGrowth@v1
+        with:
+          url: https://example.com
+          context: "Neutral SaaS demo for customer feedback management"
+          output: opengrowth-report
+          min-score: 70
+
+      - name: Upload OpenGrowth Report Artifacts
+        if: always() # Ensure artifacts are uploaded even if threshold fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: opengrowth-report
+          path: opengrowth-report/

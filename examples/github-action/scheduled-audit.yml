@@ -1,0 +1,27 @@
+name: OpenGrowth Scheduled Audit
+
+on:
+  schedule:
+    # Run every Monday at 9:00 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run OpenGrowth Audit
+        uses: Savior-Systems/OpenGrowth@v1
+        with:
+          url: https://example.com
+          context: "Neutral SaaS demo for customer feedback management"
+          output: opengrowth-report
+
+      - name: Upload OpenGrowth Report Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: opengrowth-report-scheduled
+          path: opengrowth-report/
