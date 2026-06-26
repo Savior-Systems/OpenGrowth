@@ -4,6 +4,14 @@ import { isValidUrl, normalizeUrl } from "../utils/url.js";
 import { fetchPage, getUrlStatus } from "../crawler/fetcher.js";
 import { parseHtml } from "../crawler/parser.js";
 import { PageData } from "../models/page-data.js";
+import { getAllRules } from "../rules/registry.js";
+import { runRules } from "../rules/runner.js";
+import { RuleResult } from "../rules/types.js";
+import { calculateScore } from "../scoring/calculator.js";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface AuditResult {
   tool: string;
@@ -21,272 +29,94 @@ export interface AuditResult {
       adReadiness: number;
     };
   };
+  /** High-level findings derived from failed rule results. */
   findings: Array<{
     category: string;
     priority: "high" | "medium" | "low";
     title: string;
     description: string;
   }>;
+  /** Full rule-level results (one per rule). */
+  ruleResults: RuleResult[];
   nextSteps: string[];
   pageData?: PageData;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Core audit function
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
- * Evaluate the parsed PageData using lightweight heuristic rules for v0.2.
+ * Run the v0.3 rule-engine audit against pre-crawled PageData.
+ *
+ * This replaces the inline heuristics from v0.2 with the modular rule engine.
+ * The function name is kept for backward compatibility with existing importers.
  */
 export function runHeuristicAudit(
   url: string,
   context: string,
   pageData: PageData,
 ): AuditResult {
-  const findings: Array<{
-    category: string;
-    priority: "high" | "medium" | "low";
-    title: string;
-    description: string;
-  }> = [];
+  const rules = getAllRules();
+  const ruleResults = runRules(pageData, rules);
+  const scoreCard = calculateScore(ruleResults, rules);
 
-  // 1. SEO Foundation Scoring (Max: 100)
-  let seoScore = 0;
-  if (pageData.title) {
-    seoScore += 30;
-    if (pageData.title.length > 60 || pageData.title.length < 10) {
-      findings.push({
-        category: "seo",
-        priority: "medium",
-        title: "Optimize title tag length",
-        description: `Current title length is ${pageData.title.length} characters. Titles should ideally be between 10-60 characters.`,
-      });
-    }
-  } else {
-    findings.push({
-      category: "seo",
-      priority: "high",
-      title: "Missing title tag",
-      description: "The page does not have a <title> element, which is critical for search engine indexing.",
-    });
-  }
+  // Derive findings from failed rules (sorted: high → medium → low)
+  const priorityOrder = { high: 0, medium: 1, low: 2 } as const;
+  const findings = ruleResults
+    .filter((r) => !r.passed)
+    .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+    .map((r) => ({
+      category: r.category,
+      priority: r.priority,
+      title: r.title,
+      description: r.description,
+    }));
 
-  if (pageData.metaDescription) {
-    seoScore += 30;
-    if (pageData.metaDescription.length > 160 || pageData.metaDescription.length < 50) {
-      findings.push({
-        category: "seo",
-        priority: "medium",
-        title: "Optimize meta description length",
-        description: `Current description is ${pageData.metaDescription.length} characters. Descriptions should ideally be between 50-160 characters.`,
-      });
-    }
-  } else {
-    findings.push({
-      category: "seo",
-      priority: "high",
-      title: "Missing meta description",
-      description: "No meta description tag was found. Search engines will fallback to auto-generated page snippets.",
-    });
-  }
-
-  if (pageData.canonicalUrl) {
-    seoScore += 20;
-  } else {
-    findings.push({
-      category: "seo",
-      priority: "medium",
-      title: "Missing canonical URL",
-      description: "No canonical link element was found. This can lead to duplicate content indexing issues.",
-    });
-  }
-
-  if (pageData.robotsTxtStatus === 200) {
-    seoScore += 10;
-  } else {
-    findings.push({
-      category: "seo",
-      priority: "medium",
-      title: "robots.txt is missing or unreachable",
-      description: `robots.txt request returned status ${pageData.robotsTxtStatus || "failed"}. Search engine crawlers need robots.txt for routing.`,
-    });
-  }
-
-  if (pageData.sitemapStatus === 200) {
-    seoScore += 10;
-  } else {
-    findings.push({
-      category: "seo",
-      priority: "low",
-      title: "Sitemap xml is missing or unreachable",
-      description: `sitemap.xml returned status ${pageData.sitemapStatus || "failed"} at default location. Sitemaps help crawlers find page URLs.`,
-    });
-  }
-
-  // 2. Offer Clarity Scoring (Max: 100)
-  let offerScore = 0;
-  const h1s = pageData.headings.filter((h) => h.level === 1);
-  if (h1s.length === 1) {
-    offerScore += 60;
-  } else if (h1s.length > 1) {
-    offerScore += 30;
-    findings.push({
-      category: "offer",
-      priority: "medium",
-      title: "Multiple H1 headings detected",
-      description: `Found ${h1s.length} H1 tags. Pages should generally have exactly one H1 tag representing the primary value proposition.`,
-    });
-  } else {
-    findings.push({
-      category: "offer",
-      priority: "high",
-      title: "Missing H1 heading tag",
-      description: "No H1 heading was found. The page lacks a clear above-the-fold main headline.",
-    });
-  }
-
-  if (pageData.headings.length > 3) {
-    offerScore += 40;
-  } else if (pageData.headings.length > 0) {
-    offerScore += 20;
-  } else {
-    findings.push({
-      category: "offer",
-      priority: "high",
-      title: "Sparse heading structure",
-      description: "No structured headings (H1-H6) were found on the page, indicating weak layout hierarchy.",
-    });
-  }
-
-  // 3. Conversion Readiness Scoring (Max: 100)
-  let conversionScore = 0;
-  if (pageData.ctas.length > 0) {
-    conversionScore += 60;
-  } else {
-    findings.push({
-      category: "conversion",
-      priority: "high",
-      title: "No Call-to-Action (CTA) elements detected",
-      description: "No buttons, form submits, or button-style links were found. Users have no clear action path.",
-    });
-  }
-
-  if (pageData.forms.length > 0) {
-    conversionScore += 40;
-  } else {
-    findings.push({
-      category: "conversion",
-      priority: "medium",
-      title: "No capture forms found",
-      description: "No form structures were detected. Adding lead-capture forms or email signups improves lead conversion.",
-    });
-  }
-
-  // 4. Content Opportunity Scoring (Max: 100)
-  let contentScore = 0;
-  const wordCount = pageData.bodyText.split(/\s+/).filter(Boolean).length;
-  if (wordCount > 600) {
-    contentScore += 60;
-  } else if (wordCount > 250) {
-    contentScore += 40;
-  } else {
-    contentScore += 20;
-    findings.push({
-      category: "content",
-      priority: "medium",
-      title: "Thin content density",
-      description: `Found only around ${wordCount} words of text. Thin content pages may struggle to rank and might not provide enough context.`,
-    });
-  }
-
-  const badImages = pageData.images.filter((img) => !img.alt);
-  if (pageData.images.length > 0) {
-    if (badImages.length === 0) {
-      contentScore += 40;
-    } else {
-      const pct = Math.round((badImages.length / pageData.images.length) * 100);
-      contentScore += Math.max(0, 40 - pct);
-      findings.push({
-        category: "content",
-        priority: "medium",
-        title: "Images missing alt tags",
-        description: `${badImages.length} out of ${pageData.images.length} images (${pct}%) lack alt text, harming SEO and accessibility.`,
-      });
-    }
-  } else {
-    contentScore += 20;
-  }
-
-  // 5. Ad Readiness Scoring (Max: 100)
-  let adScore = 0;
-  const ogKeys = Object.keys(pageData.openGraph);
-  if (ogKeys.length > 0) {
-    const hasCoreOg = ["title", "description", "image"].every((k) => ogKeys.includes(k));
-    if (hasCoreOg) {
-      adScore += 80;
-    } else {
-      adScore += 40;
-      findings.push({
-        category: "ads",
-        priority: "low",
-        title: "Incomplete Open Graph markup",
-        description: "Open Graph tags are present but missing core fields like og:image or og:description, which impacts social sharing cards.",
-      });
-    }
-  } else {
-    findings.push({
-      category: "ads",
-      priority: "medium",
-      title: "Missing Open Graph metadata",
-      description: "No og: tags were found. Sharing this page on social platforms will not render preview cards correctly.",
-    });
-  }
-
-  if (pageData.jsonLd.length > 0) {
-    adScore += 20;
-  }
-
-  // Generate Next Steps
+  // Generate prioritised next steps from high-severity failures
   const nextSteps: string[] = [];
-  if (findings.some((f) => f.category === "seo" && f.priority === "high")) {
-    nextSteps.push("Address critical SEO issues (missing title/description tags)");
+  for (const result of ruleResults.filter((r) => !r.passed && r.priority === "high")) {
+    nextSteps.push(`Fix: ${result.title}`);
   }
-  if (findings.some((f) => f.category === "offer" && f.priority === "high")) {
-    nextSteps.push("Establish a single, clear H1 heading for the primary value proposition");
+  // Add medium-priority next steps if no high-priority failures
+  if (nextSteps.length === 0) {
+    for (const result of ruleResults.filter((r) => !r.passed && r.priority === "medium").slice(0, 3)) {
+      nextSteps.push(`Improve: ${result.title}`);
+    }
   }
-  if (findings.some((f) => f.category === "conversion" && f.priority === "high")) {
-    nextSteps.push("Add a prominent Call-to-Action (CTA) above the fold and at key section endings");
+  if (nextSteps.length === 0) {
+    nextSteps.push("Excellent baseline! Continue refining content and conversion elements.");
   }
-  if (badImages.length > 0) {
-    nextSteps.push("Add descriptive alt tags to your images");
-  }
-  if (ogKeys.length === 0) {
-    nextSteps.push("Add Open Graph meta tags to control preview cards on social networks");
-  }
-  nextSteps.push("Configure custom rules in next version to detail growth checklists");
-
-  const overall = Math.round((seoScore + offerScore + conversionScore + contentScore + adScore) / 5);
 
   return {
     tool: "OpenGrowth",
-    version: "0.2.0",
+    version: "0.3.0",
     url,
     context: context || "No business context provided.",
     generatedAt: new Date().toISOString(),
     score: {
-      overall,
+      overall: scoreCard.overall,
       categories: {
-        offerClarity: offerScore,
-        conversionReadiness: conversionScore,
-        seoFoundation: seoScore,
-        contentOpportunity: contentScore,
-        adReadiness: adScore,
+        offerClarity: scoreCard.categories.offer,
+        conversionReadiness: scoreCard.categories.conversion,
+        seoFoundation: scoreCard.categories.seo,
+        contentOpportunity: scoreCard.categories.content,
+        adReadiness: scoreCard.categories.ads,
       },
     },
     findings,
+    ruleResults,
     nextSteps,
     pageData,
   };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Report generation
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
- * Generate a Markdown report from audit data.
+ * Generate a Markdown report from an AuditResult.
  */
 export function generateMarkdownReport(audit: AuditResult): string {
   const lines: string[] = [];
@@ -322,7 +152,9 @@ export function generateMarkdownReport(audit: AuditResult): string {
     lines.push(`- **Page Title:** ${audit.pageData.title || "*None*"}`);
     lines.push(`- **Meta Description:** ${audit.pageData.metaDescription || "*None*"}`);
     lines.push(`- **Total Headings:** ${audit.pageData.headings.length}`);
-    lines.push(`- **Total Links:** ${audit.pageData.links.length} (${audit.pageData.links.filter((l) => l.isInternal).length} internal, ${audit.pageData.links.filter((l) => !l.isInternal).length} external)`);
+    lines.push(
+      `- **Total Links:** ${audit.pageData.links.length} (${audit.pageData.links.filter((l) => l.isInternal).length} internal, ${audit.pageData.links.filter((l) => !l.isInternal).length} external)`,
+    );
     lines.push(`- **Total Images:** ${audit.pageData.images.length}`);
     lines.push(`- **Total CTAs:** ${audit.pageData.ctas.length}`);
     lines.push(`- **Total Forms:** ${audit.pageData.forms.length}`);
@@ -338,11 +170,7 @@ export function generateMarkdownReport(audit: AuditResult): string {
   } else {
     for (const finding of audit.findings) {
       const priorityIcon =
-        finding.priority === "high"
-          ? "🔴"
-          : finding.priority === "medium"
-            ? "🟡"
-            : "🟢";
+        finding.priority === "high" ? "🔴" : finding.priority === "medium" ? "🟡" : "🟢";
       lines.push(`### ${priorityIcon} [${finding.priority.toUpperCase()}] ${finding.title}`);
       lines.push("");
       lines.push(`**Category:** ${finding.category}`);
@@ -351,6 +179,16 @@ export function generateMarkdownReport(audit: AuditResult): string {
       lines.push("");
     }
   }
+
+  lines.push("## Rule Results");
+  lines.push("");
+  lines.push("| Rule | Category | Status | Priority |");
+  lines.push("|------|----------|--------|----------|");
+  for (const r of audit.ruleResults) {
+    const status = r.passed ? "✅ Pass" : "❌ Fail";
+    lines.push(`| ${r.title} | ${r.category} | ${status} | ${r.priority} |`);
+  }
+  lines.push("");
 
   lines.push("## Recommended Next Steps");
   lines.push("");
@@ -362,17 +200,21 @@ export function generateMarkdownReport(audit: AuditResult): string {
     }
   }
   lines.push("");
-  lines.push("## Version Notice");
+  lines.push("## Version");
   lines.push("");
   lines.push(
-    `> This is a v0.2 crawler-driven audit. More sophisticated scoring and rules will be introduced in v0.3.`,
+    `> Generated by OpenGrowth v${audit.version} — rule-engine powered audit.`,
   );
   lines.push("");
-  lines.push(`*Generated by OpenGrowth v${audit.version} on ${audit.generatedAt}*`);
+  lines.push(`*Audit run: ${audit.generatedAt}*`);
   lines.push("");
 
   return lines.join("\n");
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CLI summary printer
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Print a CLI-friendly audit summary to stdout.
@@ -391,7 +233,9 @@ export function printAuditSummary(audit: AuditResult): void {
     console.log("  ── Page Content Summary ──────────────────────────────");
     console.log(`  Title:         ${audit.pageData.title || "[None]"}`);
     console.log(`  Headings:      ${audit.pageData.headings.length} tags`);
-    console.log(`  Links:         ${audit.pageData.links.length} total (${audit.pageData.links.filter((l) => l.isInternal).length} internal)`);
+    console.log(
+      `  Links:         ${audit.pageData.links.length} total (${audit.pageData.links.filter((l) => l.isInternal).length} internal)`,
+    );
     console.log(`  Images:        ${audit.pageData.images.length} total`);
     console.log(`  CTAs found:    ${audit.pageData.ctas.length} elements`);
     console.log(`  Forms:         ${audit.pageData.forms.length} forms`);
@@ -413,11 +257,7 @@ export function printAuditSummary(audit: AuditResult): void {
   } else {
     for (const finding of audit.findings.slice(0, 8)) {
       const icon =
-        finding.priority === "high"
-          ? "🔴"
-          : finding.priority === "medium"
-            ? "🟡"
-            : "🟢";
+        finding.priority === "high" ? "🔴" : finding.priority === "medium" ? "🟡" : "🟢";
       console.log(`  ${icon} [${finding.priority.toUpperCase()}] ${finding.title}`);
     }
     if (audit.findings.length > 8) {
@@ -427,8 +267,13 @@ export function printAuditSummary(audit: AuditResult): void {
   console.log("");
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Main command entrypoint
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
- * Run the audit command.
+ * Run the audit command end-to-end:
+ * fetch → parse → rule engine → score → write output files.
  */
 export async function runAudit(options: {
   url: string;
@@ -449,51 +294,54 @@ export async function runAudit(options: {
   try {
     // 1. Fetch main page content
     const fetchResult = await fetchPage(normalizedUrl);
-    
-    // 2. Parse main page content
+
+    // 2. Parse HTML
     const parsedData = parseHtml(fetchResult.html, fetchResult.finalUrl);
-    
-    // 3. Resolve base origin for robots / sitemaps checks
+
+    // 3. Check robots.txt and sitemap.xml
     const origin = new URL(fetchResult.finalUrl).origin;
-    const robotsTxtUrl = `${origin}/robots.txt`;
-    const sitemapUrl = `${origin}/sitemap.xml`;
-    
     console.log("  🌐 Checking robots.txt and sitemap.xml...");
     const [robotsTxtStatus, sitemapStatus] = await Promise.all([
-      getUrlStatus(robotsTxtUrl),
-      getUrlStatus(sitemapUrl),
+      getUrlStatus(`${origin}/robots.txt`),
+      getUrlStatus(`${origin}/sitemap.xml`),
     ]);
-    
+
     const pageData: PageData = {
       ...parsedData,
       robotsTxtStatus,
       sitemapStatus,
     };
-    
-    // 4. Generate scorecard / audit result
+
+    // 4. Run rule engine and generate audit
+    console.log("  ⚙️  Running rule engine...");
     const audit = runHeuristicAudit(normalizedUrl, options.context, pageData);
-    
-    // Print summary to terminal
+
+    // 5. Print summary to terminal
     printAuditSummary(audit);
 
-    // Create output directory
+    // 6. Write output files
     const outputDir = resolve(process.cwd(), options.output);
     if (!existsSync(outputDir)) {
       mkdirSync(outputDir, { recursive: true });
     }
 
-    // Write scorecard.json
     const scorecardPath = resolve(outputDir, "scorecard.json");
     writeFileSync(scorecardPath, JSON.stringify(audit, null, 2), "utf-8");
 
-    // Write report.md
     const reportPath = resolve(outputDir, "report.md");
-    const markdown = generateMarkdownReport(audit);
-    writeFileSync(reportPath, markdown, "utf-8");
+    writeFileSync(reportPath, generateMarkdownReport(audit), "utf-8");
+
+    const ruleResultsPath = resolve(outputDir, "rule-results.json");
+    writeFileSync(ruleResultsPath, JSON.stringify(audit.ruleResults, null, 2), "utf-8");
+
+    const pageDataPath = resolve(outputDir, "page-data.json");
+    writeFileSync(pageDataPath, JSON.stringify(audit.pageData, null, 2), "utf-8");
 
     console.log("  ── Output Files ─────────────────────────────────────");
     console.log(`  📄 ${scorecardPath}`);
     console.log(`  📄 ${reportPath}`);
+    console.log(`  📄 ${ruleResultsPath}`);
+    console.log(`  📄 ${pageDataPath}`);
     console.log("");
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);

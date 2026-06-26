@@ -18,3 +18,12 @@ export { parseHtml } from "./crawler/parser.js";
 
 // Model types
 export * from "./models/page-data.js";
+
+// Rule engine exports
+export { getAllRules, getRulesByCategory, getRuleById } from "./rules/registry.js";
+export { runRules } from "./rules/runner.js";
+export type { Rule, RuleResult, RuleCategory } from "./rules/types.js";
+
+// Scoring exports
+export { calculateScore, CATEGORY_WEIGHTS } from "./scoring/calculator.js";
+export type { ScoreCard } from "./scoring/calculator.js";

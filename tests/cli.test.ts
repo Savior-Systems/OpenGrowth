@@ -8,6 +8,7 @@ import {
   runAudit,
 } from "../src/commands/audit.js";
 import { PageData } from "../src/models/page-data.js";
+import type { AuditResult } from "../src/commands/audit.js";
 
 // Helper dummy PageData
 const dummyPageData: PageData = {
@@ -108,7 +109,20 @@ describe("runHeuristicAudit", () => {
 
   it("returns correct version", () => {
     const audit = runHeuristicAudit("https://example.com", "", dummyPageData);
-    expect(audit.version).toBe("0.2.0");
+    expect(audit.version).toBe("0.3.0");
+  });
+
+  it("includes ruleResults array from rule engine", () => {
+    const audit = runHeuristicAudit("https://example.com", "", dummyPageData);
+    expect(audit.ruleResults).toBeInstanceOf(Array);
+    expect(audit.ruleResults.length).toBeGreaterThan(0);
+    // Every result has required fields
+    for (const r of audit.ruleResults) {
+      expect(r).toHaveProperty("ruleId");
+      expect(r).toHaveProperty("passed");
+      expect(r).toHaveProperty("category");
+      expect(r).toHaveProperty("priority");
+    }
   });
 
   it("includes the provided URL", () => {
@@ -238,12 +252,15 @@ describe("runAudit file output", () => {
     expect(existsSync(resolve(testOutputDir, "report.md"))).toBe(true);
 
     const rawScorecard = readFileSync(resolve(testOutputDir, "scorecard.json"), "utf-8");
-    const data = JSON.parse(rawScorecard);
+    const data = JSON.parse(rawScorecard) as AuditResult;
     expect(data.tool).toBe("OpenGrowth");
-    expect(data.version).toBe("0.2.0");
+    expect(data.version).toBe("0.3.0");
     expect(data.url).toBe("https://example.com");
     expect(data.pageData).toBeDefined();
-    expect(data.pageData.title).toBe("Mock Page");
-    expect(data.pageData.headings[0]).toEqual({ level: 1, text: "Value Prop Headline" });
+    expect(data.pageData?.title).toBe("Mock Page");
+    expect(data.pageData?.headings[0]).toEqual({ level: 1, text: "Value Prop Headline" });
+    // v0.3: verify rule results are persisted
+    expect(Array.isArray(data.ruleResults)).toBe(true);
+    expect(data.ruleResults.length).toBeGreaterThan(0);
   });
 });
