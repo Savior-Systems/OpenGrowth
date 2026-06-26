@@ -28,7 +28,30 @@ Thank you for your interest in contributing to OpenGrowth! 🚀
 
 ### Contributing Rule Packs
 
-OpenGrowth's power comes from its modular rule packs. See [docs/rules-engine.md](./docs/rules-engine.md) for how to create custom rules.
+OpenGrowth's power comes from its modular rule packs. If you want to contribute new validation checks (e.g., SEO, Content, Conversion, Trust, Ads, or Industry-specific audits):
+1. Review the rule engine architecture in [docs/rules-engine.md](./docs/rules-engine.md).
+2. Create or modify rules inside `src/rules/`.
+3. Add tests verifying the rule outputs.
+
+### Contributing Example Reports & Gallery
+
+Help others learn by contributing audit results of interesting websites to the gallery:
+1. Run a local audit on a public website.
+2. Ensure you follow anonymization guidelines in [examples/report-gallery/README.md](./examples/report-gallery/README.md) if the data is sensitive.
+3. Submit a PR placing the 9 output files in `examples/report-gallery/<site-name>`.
+
+### Contributing Launch Assets & Documentation
+
+If you want to suggest improvements to our outreach drafts, video scripts, visual screenshot checklists, or general project documentation:
+1. Open an issue proposing the change.
+2. Modify or add draft templates under `examples/launch-assets/` or `docs/`.
+3. Submit a PR.
+
+### Dashboard Feedback & Bug Reports
+
+For issues or improvements related to the self-hosted dashboard:
+1. Open an issue describing the UI layout error or new feature request.
+2. Run testing locally and verify dashboard server responsiveness before submitting code changes.
 
 ## Development Setup
 

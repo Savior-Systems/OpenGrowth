@@ -212,7 +212,7 @@ describe("Dashboard HTTP Server", () => {
     const json = await response.json() as any;
     expect(json.ok).toBe(true);
     expect(json.tool).toBe("OpenGrowth");
-    expect(json.version).toBe("0.8.0");
+    expect(json.version).toBe("0.9.0");
   });
 });
 

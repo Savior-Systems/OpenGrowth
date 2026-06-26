@@ -75,11 +75,12 @@ OpenGrowth becomes the **Lighthouse for growth** — the standard open-source to
 
 ## v0.9 — Examples & Launch Assets
 
-- [ ] 5+ neutral SaaS demo reports
-- [ ] Example rule packs (e-commerce, SaaS, agency)
-- [ ] Video walkthrough
-- [ ] Blog post / launch article
-- [ ] Social media assets
+- [x] Curated neutral SaaS demo report & context (FlowPilot)
+- [x] Launch asset drafts (PH, Show HN, Reddit, LinkedIn, X/Twitter)
+- [x] Demo walkthrough script & terminal GIF storyboard
+- [x] Screenshot checklist & community outreach guides
+- [x] Report gallery guidelines & example templates
+
 
 ## v1.0 — Public Launch
 

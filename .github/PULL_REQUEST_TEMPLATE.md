@@ -1,36 +1,34 @@
 ## Description
 
-Brief description of the changes.
+Please include a detailed summary of the changes and the specific problem they solve.
 
 ## Type of Change
 
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Rule pack addition/update
-- [ ] Documentation update
-- [ ] Refactoring
-- [ ] Performance improvement
-- [ ] CI/CD change
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Rule pack addition or update
+- [ ] Documentation or Example Report update
+- [ ] Refactoring or codebase cleanup
+- [ ] Performance optimization
+- [ ] CI/CD workflow configuration change
 
 ## Related Issue
 
-Closes #
+Fixes # (or links to rule proposals / feature requests)
 
-## Changes Made
+## Testing Performed
 
-- Change 1
-- Change 2
+Please describe the tests that you ran to verify your changes.
+- [ ] Unit & integration tests pass: `npm test`
+- [ ] Typecheck passes: `npm run typecheck`
+- [ ] Linter passes: `npm run lint`
+- [ ] Verified build output: `npm run build`
+- [ ] Manual CLI verification performed (include command used)
 
-## Testing
+## Contributor Checklist
 
-- [ ] Unit tests pass (`npm test`)
-- [ ] Lint passes (`npm run lint`)
-- [ ] Manual testing performed
-
-## Checklist
-
-- [ ] My code follows the project's code style
-- [ ] I have added/updated tests for my changes
-- [ ] I have updated documentation as needed
-- [ ] I have updated the CHANGELOG.md if applicable
-- [ ] My changes do not introduce new warnings
+- [ ] My code follows the project's code style and formatting rules
+- [ ] My changes do not introduce new TypeScript or build warnings
+- [ ] I have added tests that prove my fix or feature works
+- [ ] I have updated corresponding documentation in `docs/` or `README.md`
+- [ ] I have added a new entry to the `CHANGELOG.md` under the Unreleased section

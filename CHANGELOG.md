@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.8.0] - Unreleased
+## [0.9.0] - Unreleased
+
+### Added
+- Neutral SaaS example package (FlowPilot context, README, scorecard, and strategy files).
+- Curated sample report, content, and ad strategy snippets.
+- Launch asset drafts for Product Hunt, Hacker News, Reddit, LinkedIn, and X/Twitter.
+- Screenshot checklist and GIF storyboard blueprints.
+- Report gallery setup with anonymization guidelines.
+- Contributor template for example report submissions.
+- Structured examples-and-launch docs guide.
+
+### Changed
+- Improved root README.md launch readiness, quickstart instructions, and feature grids.
+- Polished GitHub issue and PR templates.
+
+## [0.8.0] - 2026-06-27
 
 ### Added
 - Local self-hosted dashboard.

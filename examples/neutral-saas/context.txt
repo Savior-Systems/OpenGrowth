@@ -1,0 +1,9 @@
+Company Name: FlowPilot
+Product Category: B2B SaaS Customer Feedback & Product Roadmap Management
+Target Audience: Product Managers, Startup Founders, Customer Success Leads, Digital Product Agencies
+Core Problem: Customer feedback is scattered across Slack, email, Intercom, and spreadsheets, making feature prioritization slow, unorganized, and subjective.
+Primary Value Promise: Centralize scattered customer feedback in one repository, automatically identify request patterns using smart tagging, and turn qualitative insights into data-driven roadmap prioritization decisions.
+Main Offer: Get started for free (up to 100 feedback sources monthly) or upgrade to the Growth tier for $49/month with unlimited integrations and automated customer notification emails when features are shipped.
+Fictional Competitors: Generalist spreadsheet tools, legacy enterprise issue trackers.
+Desired Tone: Professional, developer-friendly, objective, and action-oriented.
+Target Market: Small-to-medium technology companies and high-growth product teams.

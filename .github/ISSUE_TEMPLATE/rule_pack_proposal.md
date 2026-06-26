@@ -1,6 +1,6 @@
 ---
 name: Rule Pack Proposal
-about: Propose a new rule pack for OpenGrowth
+about: Propose a new rule pack or audit check for OpenGrowth
 title: "[RULES] "
 labels: rule-pack
 assignees: ''
@@ -8,24 +8,25 @@ assignees: ''
 
 ## Rule Pack Name
 
-e.g., `ecommerce`, `saas-landing`, `blog-seo`
+Suggested identifier for the rule pack (e.g., `saas-conversion`, `seo-metadata`, `ecommerce-trust`).
 
-## Description
+## Scope & Target Audience
 
-What does this rule pack check for?
+What category of websites or business models does this rule pack cover? (e.g., B2B SaaS, mobile app landing pages, e-commerce stores).
 
-## Target Audience
+## Proposed Audit Rules
 
-Who would use this rule pack?
+List the specific checks, expected inputs, scoring impacts, and fail conditions:
 
-## Proposed Rules
+1. **[Rule Name]**:
+   - **Check**: (What tag, header, or file is checked?)
+   - **Score Impact**: (Weight or points deducted/added)
+   - **Severity**: (Critical / Warning / Info)
+   - **Evidence & Recommendation**: (What is shown in reports when failing?)
 
-List the rules you'd like to include:
+2. **[Rule Name]**:
+   - **Check**: ...
 
-- [ ] Rule 1: Description
-- [ ] Rule 2: Description
-- [ ] Rule 3: Description
+## Code or Reference Material
 
-## Examples
-
-Provide example URLs or scenarios where this would be useful.
+If you have sample JavaScript code, cheerio selector patterns, or industry standards supporting these rules, please include them here.

@@ -155,7 +155,7 @@ export function runHeuristicAudit(
 
   return {
     tool: "OpenGrowth",
-    version: "0.8.0",
+    version: "0.9.0",
     url,
     context: context || "No business context provided.",
     generatedAt: new Date().toISOString(),

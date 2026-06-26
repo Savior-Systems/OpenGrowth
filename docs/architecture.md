@@ -1,6 +1,6 @@
 # OpenGrowth Architecture
 
-> System Architecture — current version v0.8.0.
+> System Architecture — current version v0.9.0.
 
 ## System Overview
 
@@ -58,6 +58,11 @@
 - **CLI** — Command-line interface built with `commander`.
 - **Dashboard** — Self-hosted local web interface built with Node.js native `http` server.
 - **Input Resolver** — Determines whether input is a URL or plain text, routes accordingly.
+
+### Adoption & Launch Layer
+- **Curated Examples** — Fictional SaaS audit configurations (like `FlowPilot` in `examples/neutral-saas`) providing pre-computed scorecard templates for new users.
+- **Report Gallery** — Community-driven showcase directory for submitted, anonymized growth blueprints.
+- **Launch Blueprints** — Planning storyboards, script sequences, and outreach templates for launching OpenGrowth.
 
 ### Data Acquisition Layer
 - **Web Crawler** — Fetches pages via HTTP, handles redirects, timeouts, basic error recovery.

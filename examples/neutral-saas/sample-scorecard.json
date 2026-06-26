@@ -1,0 +1,14 @@
+{
+  "tool": "OpenGrowth",
+  "version": "0.9.0",
+  "demo": "FlowPilot neutral SaaS example",
+  "overallScore": 72,
+  "categories": [
+    { "category": "seo", "score": 76 },
+    { "category": "content", "score": 68 },
+    { "category": "conversion", "score": 70 },
+    { "category": "trust", "score": 62 },
+    { "category": "ads", "score": 80 }
+  ],
+  "notes": "Curated sample output for demonstration only."
+}
