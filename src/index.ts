@@ -46,3 +46,18 @@ export { generateAdStrategyMarkdown } from "./ads/markdown.js";
 export { generateHtmlReport } from "./report/html.js";
 export type { HtmlReportInput } from "./report/html.js";
 export { escapeHtml, clampScore, scoreLabel } from "./report/html-utils.js";
+
+// Programmatic audit service export
+export { runOpenGrowthAudit } from "./audit/run-audit.js";
+
+// Dashboard exports
+export { startDashboardServer } from "./dashboard/server.js";
+export * from "./dashboard/types.js";
+export {
+  ensureDashboardDataDir,
+  readAuditHistory,
+  writeAuditHistory,
+  appendAuditRecord,
+  getAuditRecord,
+  createAuditOutputDirectory
+} from "./dashboard/storage.js";

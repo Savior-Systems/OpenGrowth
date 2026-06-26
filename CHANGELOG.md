@@ -5,7 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.0] - Unreleased
+## [0.8.0] - Unreleased
+
+### Added
+- Local self-hosted dashboard.
+- Dashboard audit form for URL and business context.
+- Local file-based audit history.
+- Dashboard audit detail pages.
+- Safe report file serving.
+- Dashboard CLI command.
+- GitHub Actions workflow cleanup to remove irrelevant template workflows.
+
+## [0.7.0] - 2026-06-27
 
 ### Added
 - Composite GitHub Action for running OpenGrowth audits in CI.

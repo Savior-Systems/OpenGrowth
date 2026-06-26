@@ -33,11 +33,11 @@ All **free**, **local-first**, and **no paid API required**.
 
 ## Features
 
-> 🏗️ **Under active development** — v0.7 GitHub Action wrapper is live.
+> 🏗️ **Under active development** — v0.8 self-hosted dashboard is live.
 
 - **CLI** — Run audits from your terminal
 - **GitHub Action** — Automate growth audits in CI/CD
-- **Self-Hosted Dashboard** — Visualize growth reports (planned)
+- **Self-Hosted Dashboard** — Visualize growth reports and run audits via UI
 - **Rule-Based Engine** — Deterministic, transparent scoring with no black box
 - **URL + Text Input** — Analyze websites or paste business context directly
 - **Local AI Ready** — Optional Ollama integration for enhanced analysis (planned)
@@ -70,8 +70,20 @@ Run OpenGrowth in CI and upload reports as artifacts:
 
 See [docs/github-action.md](./docs/github-action.md) for the full configuration reference.
 
-> **Current version:** v0.7 — composite GitHub Action, standalone HTML reports, ad angle generator, content strategy generator, real crawler, rule engine, and weighted scoring.
+> **Current version:** v0.8 self-hosted dashboard.
 > Nine output files per audit: `scorecard.json`, `report.md`, `report.html`, `page-data.json`, `rule-results.json`, `content-strategy.json`, `content-strategy.md`, `ad-strategy.json`, and `ad-strategy.md`.
+
+## Dashboard
+
+Start the self-hosted dashboard locally:
+
+```bash
+npm run build
+node dist/cli.js dashboard --port 3007
+```
+
+Open `http://localhost:3007` to run audits and view audit history. See [docs/dashboard.md](./docs/dashboard.md) for details.
+
 
 ## How It Works
 
@@ -99,7 +111,7 @@ See [docs/github-action.md](./docs/github-action.md) for the full configuration 
 | Ad Angle Generator | ✅ v0.5 |
 | HTML Reports | ✅ v0.6 |
 | GitHub Action | ✅ v0.7 |
-| Dashboard | 🔜 Planned |
+| Dashboard | ✅ v0.8 |
 
 ## Contributing
 

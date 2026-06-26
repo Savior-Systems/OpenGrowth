@@ -10,7 +10,7 @@ program
   .description(
     "Open-source growth operating system — audit any website for growth, content, ads, and conversion.",
   )
-  .version("0.7.0");
+  .version("0.8.0");
 
 program
   .command("audit")
@@ -38,6 +38,34 @@ program
       output: opts.output,
       format: opts.format,
     });
+  });
+
+program
+  .command("dashboard")
+  .description("Start the local self-hosted growth dashboard")
+  .option("-p, --port <number>", "Port to run the dashboard on", "3007")
+  .option("-d, --data <dir>", "Directory to store audits and reports data", ".opengrowth-data")
+  .action(async (opts: { port: string; data: string }) => {
+    const port = parseInt(opts.port, 10);
+    const dataDir = opts.data;
+
+    if (isNaN(port) || port < 1 || port > 65535) {
+      console.error(`\n  ❌ Invalid port number: ${opts.port}\n`);
+      process.exit(1);
+    }
+
+    const { startDashboardServer } = await import("./dashboard/server.js");
+
+    console.log(`\n  🚀 Starting OpenGrowth Dashboard...`);
+    try {
+      await startDashboardServer({ port, dataDir });
+      console.log(`\n  🟢 Dashboard running at: http://localhost:${port}`);
+      console.log(`  📂 Data Directory:         ${dataDir}`);
+      console.log(`  🛑 Press Ctrl+C to stop the server\n`);
+    } catch (err: any) {
+      console.error(`\n  ❌ Failed to start dashboard: ${err.message}\n`);
+      process.exit(1);
+    }
   });
 
 program.parse();

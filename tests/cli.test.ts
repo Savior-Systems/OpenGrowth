@@ -109,7 +109,7 @@ describe("runHeuristicAudit", () => {
 
   it("returns correct version", () => {
     const audit = runHeuristicAudit("https://example.com", "", dummyPageData);
-    expect(audit.version).toBe("0.7.0");
+    expect(audit.version).toBe("0.8.0");
   });
 
   it("includes ruleResults array from rule engine", () => {
@@ -257,7 +257,7 @@ describe("runAudit file output", () => {
     const rawScorecard = readFileSync(resolve(testOutputDir, "scorecard.json"), "utf-8");
     const data = JSON.parse(rawScorecard) as any;
     expect(data.tool).toBe("OpenGrowth");
-    expect(data.version).toBe("0.7.0");
+    expect(data.version).toBe("0.8.0");
     expect(data.url).toBe("https://example.com");
     expect(data.pageData).toBeDefined();
     expect(data.pageData?.title).toBe("Mock Page <script>alert(1)</script>");

@@ -67,8 +67,8 @@ OpenGrowth becomes the **Lighthouse for growth** — the standard open-source to
 
 ## v0.8 — Self-Hosted Dashboard
 
-- [ ] Lightweight web dashboard
-- [ ] Report history and comparison
+- [x] Lightweight web dashboard
+- [x] Report history and comparison
 - [ ] Multi-URL tracking
 - [ ] Team sharing
 - [ ] Docker deployment
